@@ -1,0 +1,391 @@
+﻿<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <script src="../../WebResources/ezt_Utilities.js"></script>
+
+    <script>
+
+        function checkEnableButton() {
+            var x = document.getElementById("btnSubmit");
+            if (x.disabled = true) x.disabled = false;
+        }
+
+        function btnMapViews_OnClick() {
+            $("#divPnlSuccess").show();
+            $('#lblUpdateMessage').text("Loading EasyTerritory...");
+
+            var eztObject = [];
+            var eztEndpoint = EZT.Utilities.getEZTSetting("EZT Instance URL");
+            var cbViews = document.getElementById("divCheckList");
+            var userGuid = Xrm.Page.context.getUserId().replace('{', '').replace('}', '');
+
+            var listLength = cbViews.children.length;
+
+            for (var i = 0; i < listLength; i += 2) {
+                if (cbViews.children[i].children[0].checked) {
+                    var strLabelValue = cbViews.children[i].children[0].value;
+                    var strLabel = cbViews.children[i].children[0].label;
+                    var strArrayValueData = strLabelValue.split('|');
+                    var strViewType = strArrayValueData[0];
+                    var strViewId = strArrayValueData[1];
+                    var strFetchXML = strArrayValueData[2];
+                    eztObject.push({
+                        type: 'fetchXml',
+                        data: strFetchXML,
+                        viewName: strLabel
+                    })
+                }
+            }
+
+            if (eztObject.length > 0) {
+                $("#divPnlMessage").hide();
+
+                //new project object
+                var project = {
+                    id: userGuid,
+                    customJson: JSON.stringify(eztObject),
+                    allowOverwrite: true,
+                    unlisted: true,
+                    label: 'Advanced Find Results'
+                };
+
+                // call ezt rest service to create a new project
+                var call = $.ajax({
+                    url: eztEndpoint + '/REST/Project',
+                    type: 'POST',
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(project)
+                });
+
+                // returns newly created project id
+                call.done(function (data) {
+                    var projectId = data.id;
+                    // window.open here using project id
+                    window.open(eztEndpoint + '/index.html?projectId=' + projectId);
+                });
+                setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
+
+            } else {
+                $("#divPnlSuccess").hide();
+                $("#divPnlMessage").show();
+                $('#lblMessage').text("No Views were selected!\r\nPlease select at least one view to map.");
+            }
+
+        };
+
+    </script>
+    <style>
+        body {
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .align-right {
+            text-align: right;
+        }
+
+        spaced-2x, .spaced-v-2x, .spaced-top-2x {
+            margin-top: 16px;
+        }
+
+        table {
+            margin: 20px;
+            padding: 20px;
+            border-color: #EEE;
+            width: 700px;
+            border-style: solid;
+        }
+
+        thead tr {
+            background-color: #EEE;
+            border-color: #EEE;
+            border-style: solid;
+        }
+
+        td {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .checkList {
+            /*width: 95%;*/
+            overflow: auto;
+            overflow-x: hidden;
+            height: 250px;
+        }
+
+        .btn {
+            margin-right: 8px;
+            padding: 10px;
+        }
+
+        .alert-danger {
+            color: black;
+            background-color: yellow;
+        }
+
+         .alert-success {
+            color: black;
+            background-color: greenyellow;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 20px;
+            border: 1px solid black;
+            border-radius: 10px;
+            width: 680px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="divPnlMessage" hidden="hidden" class="alert alert-danger">
+        <label id="lblMessage" style="font-size:16pt;">...</label>
+    </div>
+    <div id="pnlSelectViews">
+        <table>
+            <thead>
+                <tr style="background-color:white;"><td><img src="../../WebResources/EZT_logo_256x55.png" /></td></tr>
+                <tr>
+                    <td>
+                        Select views to map with EasyTerritory
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="divCheckList" class="checkList">
+
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="align-right spaced-top-2x">
+                        <button id="btnSubmit" type="button" class="btn" onclick="btnMapViews_OnClick()">
+                            Map Selected Views
+                        </button>
+                    </td>
+                </tr>
+                <tr id="trSuccess">
+                    <td >
+                        <div id="divPnlSuccess" hidden="hidden" class="alert alert-success">
+                            <label id="lblUpdateMessage" style="font-size:12pt;">Loading EasyTerritory...</label>
+                        </div>
+                    </td>
+
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+
+
+    <script>
+        var arrayWorkingList = [];
+
+        function page_OnLoad() {
+            var strLatFields = EZT.Utilities.getEZTSetting("crmAdvFindLatFields");
+            var strArrayLats = strLatFields.split(',');
+
+            var strLonFields = EZT.Utilities.getEZTSetting("crmAdvFindLonFields");
+            var strArrayLons = strLonFields.split(',');
+            if (strArrayLats != "NoSettingReturned" && strArrayLons != "NoSettingReturned" && strArrayLats.length > 0 && strArrayLons.length > 0) {
+                $("#divPnlMessage").hide();
+                // Clear divCheckList items
+                document.getElementById('divCheckList').innerHTML = '';
+
+                // Build the REST query
+                var strURL = Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/SavedQuerySet?";
+                var strColumnSet = "$select=FetchXml,Name,QueryType,SavedQueryId,ReturnedTypeCode";
+                var strFilter = "&$filter=QueryType eq 0";
+
+                // Sample of how to do group or in query
+                // ( substringof('address1_latitude',FetchXml) or  substringof('new_latitude',FetchXml))
+                // and ( substringof('new_longitude',FetchXml) or  substringof('address1_longitude',FetchXml))";
+
+                if (strArrayLats.length > 0) {
+                    strFilter = strFilter + " and ( "
+                    for (var i = 0; i < strArrayLats.length; i++) {
+                        strFilter = strFilter + " substringof('" + strArrayLats[i].toLowerCase() + "', FetchXml) or ";
+
+                    }
+                    strFilter = strFilter.substr(0, strFilter.length - 3);
+                    strFilter = strFilter + ")"
+                }
+
+                if (strArrayLons.length > 0) {
+                    strFilter = strFilter + " and ( "
+                    for (var i = 0; i < strArrayLons.length; i++) {
+                        strFilter = strFilter + " substringof('" + strArrayLons[i].toLowerCase() + "', FetchXml) or ";
+
+                    }
+                    strFilter = strFilter.substr(0, strFilter.length - 3);
+                    strFilter = strFilter + ")"
+                }
+                strURL = strURL + strColumnSet + strFilter;
+
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: strURL,
+                    beforeSend: function (XMLHttpRequest) { XMLHttpRequest.setRequestHeader("Accept", "application/json"); },
+                    async: false,
+                    success: function (data, textStatus, xhr) {
+                        var results = data.d.results;
+
+                        for (var i = 0; i < results.length; i++) {
+                            var FetchXml = results[i].FetchXml;
+                            var Name = results[i].Name;
+                            var SavedQueryId = results[i].SavedQueryId;
+                            var ReturnedTypeCode = results[i].ReturnedTypeCode;
+                            arrayWorkingList.push({
+                                viewName: Name,
+                                viewType: "system",
+                                queryId: SavedQueryId.toString(),
+                                entitySDKName: ReturnedTypeCode,
+                                entityFriendlyName: ReturnedTypeCode,
+                                theFetchXML: FetchXml
+                            });
+
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert(textStatus + " " + errorThrown);
+                    }
+                });
+
+                strURL = Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/UserQuerySet?";
+                strColumnSet = "$select=FetchXml,Name,QueryType,UserQueryId,ReturnedTypeCode";
+                strURL = strURL + strColumnSet + strFilter;
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: strURL,
+                    beforeSend: function (XMLHttpRequest) { XMLHttpRequest.setRequestHeader("Accept", "application/json"); },
+                    async: false,
+                    success: function (data, textStatus, xhr) {
+                        var results = data.d.results;
+                        for (var i = 0; i < results.length; i++) {
+                            var FetchXml = results[i].FetchXml;
+                            var Name = results[i].Name;
+                            var ReturnedTypeCode = results[i].ReturnedTypeCode;
+                            var UserQueryId = results[i].UserQueryId;
+                            arrayWorkingList.push({
+                                viewName: Name,
+                                viewType: "system",
+                                queryId: UserQueryId.toString(),
+                                entitySDKName: ReturnedTypeCode,
+                                entityFriendlyName: ReturnedTypeCode,
+                                theFetchXML: FetchXml
+                            });
+
+                        }
+
+                        var counter = arrayWorkingList.length;
+
+                        var updateEntityFriendlyName = function (list, index) {
+
+                            var entityName = list[index].entitySDKName;
+
+                            SDK.Metadata.RetrieveEntity(
+                                SDK.Metadata.EntityFilters.Attributes,
+                                entityName,
+                                null,
+                                false,
+                                function (entityMetadata) {
+                                    list[index].entityFriendlyName = entityMetadata.DisplayName.LocalizedLabels[0].Label;
+                                    counter--;
+                                    if (counter == 0) { buildCheckBoxList(); }
+                                },
+                                errorRetrieveEntity);
+
+                        };
+
+                        var buildCheckBoxList = function () {
+                            // Sort the results
+                            arrayWorkingList.sort(EZT.Utilities.sort_by('entityFriendlyName', false, function (a) { return a.toUpperCase() }));
+                            for (var i = 0; i < arrayWorkingList.length; i++) {
+                                // var entitySDKName = arrayWorkingList[i].entitySDKName;
+                                var entityFriendlyName = arrayWorkingList[i].entityFriendlyName;
+                                var viewName = arrayWorkingList[i].viewName;
+                                var queryId = arrayWorkingList[i].queryId;
+                                var viewType = arrayWorkingList[i].viewType;
+                                var fetchXML = arrayWorkingList[i].theFetchXML;
+                                addCheckboxItem("[" + entityFriendlyName + "] - " + viewName, queryId, 'divCheckList', viewType, fetchXML);
+                            }
+                        };
+
+                        for (var i = 0; i < arrayWorkingList.length; i++) {
+                            updateEntityFriendlyName(arrayWorkingList, i);
+                        }
+
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert(textStatus + " " + errorThrown);
+                    }
+                });
+
+                //// For Debugging, add some fake views
+                //for (var i = 0; i < 20; i++) {
+                //    addCheckboxItem("[Test " + i.toString() + "] - View Name", "0", 'divCheckList', "system", "fetchXML");
+                //}
+
+            } // endif
+            else {
+
+                $("#pnlSelectViews").hide();
+                $("#divPnlMessage").show();
+                $('#lblMessage').text("Problem reading EasyTerritory Settings!  Check that EasyTerritory Settings entity has been defined and values loaded...");
+            }
+
+        };
+
+
+
+        function errorRetrieveEntity(error) {
+            ///<summary>
+            /// Displays the error returned from SDK.Metadata.RetrieveEntity if it fails.
+            ///</summary>
+            $("#pnlSelectViews").hide();
+            $("#divPnlMessage").show();
+            $('#lblMessage').text("Error retreiving Entity Data! :: " + error);
+
+        }
+
+        function addCheckboxItem(strCBLabel, SavedQueryId, divName, viewType, fetchXML) {
+            var label = document.createElement("label");
+            var description = document.createTextNode(" " + strCBLabel);
+            var checkbox = document.createElement("input");
+
+            checkbox.type = "checkbox";    // make the element a checkbox
+            checkbox.name = "cbViews";      // give it a name we can check on the server side
+            checkbox.value = viewType + "|" + SavedQueryId + "|" + fetchXML;
+
+            // TODO:  Figure out how to make this work...
+            // checkbox.onkeyup = 'checkEnableButton()';
+
+            label.appendChild(checkbox);   // add the box to the element
+            label.appendChild(description);// add the description to the element
+
+            // add the label element to your div
+            document.getElementById(divName).appendChild(label);
+            document.getElementById(divName).appendChild(document.createElement("br"));
+        }
+
+
+
+        page_OnLoad();
+    </script>
+
+</body>
+</html>

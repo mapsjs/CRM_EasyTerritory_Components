@@ -1,0 +1,345 @@
+﻿<html>
+<head>
+    <meta charset="utf-8">
+
+    <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <script src="../../WebResources/ezt_Utilities.js"></script>
+    <script>
+        function btnUpdateSettings_OnClick() {
+            var arrayFormSettings = [];
+
+            // var tblSettings = document.getElementById("tblSettings");
+            var tblTbody = document.getElementById("tblTbody");
+
+            var intNumRows = tblTbody.childNodes.length;
+            var settingsUpdated = false;
+
+            for (var i = 0; i < intNumRows; i++) {
+                var inputTxtSettingName = document.getElementById("td1_" + i.toString()).innerText;
+                var inputTxtSettingValue = document.getElementsByName("txtSettingValue_" + i.toString())[0].value;
+                var inputTxtSettingID = document.getElementById("td3_" + i.toString()).innerText;
+
+                var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
+                // Only update value if it's changed...
+                if (strTestSettingValue.toString().toLowerCase() != inputTxtSettingValue.toLowerCase()) {
+                    updateEZTSettingValue(inputTxtSettingID, inputTxtSettingValue);
+                    settingsUpdated = true;
+
+                }
+
+            }
+
+            if (settingsUpdated) {
+                $("#divPnlSuccess").show();
+                $('#lblUpdateMessage').text("Settings Updated...");
+            }
+
+            else {
+                $("#divPnlSuccess").show();
+                $('#lblUpdateMessage').text("No changes to send...");
+            }
+            setTimeout(function () {$("#divPnlSuccess").hide();}, 5000);
+        }
+
+        function updateEZTSettingValue(settingGuid, newValue) {
+            var entity = {};
+            entity.ezt_Setting = newValue;
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet(guid'" + settingGuid + "')",
+                data: JSON.stringify(entity),
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                    XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
+                },
+                async: false,
+                success: function (data, textStatus, xhr) {
+
+                    // alert("Updated"); //Success - No Return Data - Do Something
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+        };
+
+    </script>
+    <style>
+        body {
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .align-right {
+            text-align: right;
+        }
+
+        spaced-2x, .spaced-v-2x, .spaced-top-2x {
+            margin-top: 16px;
+        }
+
+        table {
+            margin: 20px;
+            padding: 10px;
+            border-color: #EEE;
+            width: 800px;
+            border-style: solid;
+        }
+
+         .toolbar {
+            margin: 20px;
+            padding: 5px 10px 5px 10px;
+            border-color: #EEE;
+            width: 800px;
+            border-style: solid;
+        }
+
+        thead tr {
+            background-color: #EEE;
+            border-color: #EEE;
+            border-style: solid;
+        }
+
+        td {
+            margin: 20px;
+            padding: 10px;
+        }
+
+        /*tbody {
+            width: 95%;
+            overflow: auto;
+            overflow-x: hidden;
+            height: 300px;
+        }*/
+
+        .checkList {
+            width: 95%;
+            overflow: auto;
+            overflow-x: hidden;
+            height: 200px;
+        }
+
+        .btn {
+            margin-right: 8px;
+            padding: 10px;
+        }
+
+        .alert-danger {
+            color: black;
+            background-color: yellow;
+        }
+
+        .alert-success {
+            color: black;
+            background-color: greenyellow;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 20px;
+            /*border: 1px solid black;*/
+            border-radius: 5px;
+            /*width: 580px;*/
+        }
+
+        .settingNameRow {
+            width: 15%;
+        }
+
+        .settingRowHeader {
+            background-color: yellow;
+        }
+
+        .settingRow {
+            width: 84%;
+        }
+
+        input {
+            width: 100%;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="divPnlTools">
+        <table class="toolbar">
+            <tr>
+                <td>
+                    <a href="../../WebResources/ezt_MapViewBuilder"><img src="../../WebResources/ezt_Map_Icon_16_16" />&nbsp;Map View Builder</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="pnlSettings">
+        <table id="tblSettings">
+            <thead>
+                <tr style="background-color:white;"><td colspan="2"><img src="../../WebResources/EZT_logo_256x55.png" /></td></tr>
+                <tr>
+                    <td colspan="2">
+                        Review EasyTerritory Settings
+                    </td>
+                </tr>
+                <tr><td class="settingNameRow settingRowHeader">Setting Name</td><td class="settingRow settingRowHeader">Setting Value</td></tr>
+            </thead>
+            <tbody id="tblTbody">
+                <!--<tr>
+                    <td>
+                    </td>
+                </tr>-->
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <td class="align-right spaced-top-2x" colspan="2">
+                        <button id="btnUpdateSettings" type="button" class="btn" onclick="btnUpdateSettings_OnClick()">
+                            Update Settings
+                        </button>
+                    </td>
+                </tr>
+                <tr id="trSuccess">
+                    <td colspan="2">
+                        <div id="divPnlSuccess" hidden="hidden" class="alert alert-success">
+                            <label id="lblUpdateMessage" style="font-size:12pt;">Settings Updated...</label>
+                        </div>
+                    </td>
+
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <script>
+        var arrayWorkingList = [];
+
+        function page_OnLoad() {
+            $("#divPnlSuccess").hide();
+            // Check for and set Default Values.
+            var strLatFields = EZT.Utilities.getEZTSetting("crmAdvFindLatFields");
+            var strLonFields = EZT.Utilities.getEZTSetting("crmAdvFindLonFields");
+            var eztEndpoint = EZT.Utilities.getEZTSetting("EZT Instance URL");
+
+            if (strLatFields == "NoSettingReturned") {
+                setDefaultValue("crmAdvFindLatFields", "new_latitude,new_lat,address1_latitude");
+            }
+
+            if (strLonFields == "NoSettingReturned") {
+                setDefaultValue("crmAdvFindLonFields", "new_longitude,new_lon,address1_longitude");
+            }
+
+            if (eztEndpoint == "NoSettingReturned") {
+                setDefaultValue("EZT Instance URL", "https://apps.easyterritory.com/GUID/APP");
+            }
+
+            // Retrieve the current settings
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet?$select=ezt_easyterritorysettingsId,ezt_Setting,ezt_SettingName,ModifiedOn",
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                },
+                async: true,
+                success: function (data, textStatus, xhr) {
+                    var results = data.d.results;
+                    for (var i = 0; i < results.length; i++) {
+                        var ezt_easyterritorysettingsId = results[i].ezt_easyterritorysettingsId;
+                        var ezt_SettingName = results[i].ezt_SettingName;
+                        var ezt_Setting = results[i].ezt_Setting;
+                        var dtModifiedOn = results[i].ModifiedOn;
+                        addSettingTableRow("divSettings", ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i.toString());
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+
+        }; // end page_OnLoad
+
+        function setDefaultValue(settingName, defaultValue) {
+            var entity = {};
+            entity.ezt_SettingName = settingName;
+            entity.ezt_Setting = defaultValue;
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet",
+                data: JSON.stringify(entity),
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                },
+                async: false,
+                success: function (data, textStatus, xhr) {
+                    var result = data.d;
+                    var newEntityId = result.ezt_easyterritorysettingsId;
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+        };
+
+        function addSettingTableRow(divName, ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i) {
+            var tblSettings = document.getElementById("tblSettings");
+            var tr = document.createElement('tr');
+
+            var td1 = document.createElement('td');
+            var td2 = document.createElement('td');
+            td1.id = "td1_" + i;
+
+            var td3 = document.createElement('td');
+            td3.id = "td3_" + i;
+            td3.hidden = "true";
+            var text3 = document.createTextNode(ezt_easyterritorysettingsId);
+            text3.nodeName = "td3_" + i;
+
+            var text1 = document.createTextNode(ezt_SettingName);
+            // text1.data = ezt_easyterritorysettingsId;
+            text1.nodeName = "txtSetting_" + i;
+
+            var txtInput = document.createElement("input");
+            txtInput.type = "text";    // make the element a checkbox
+            txtInput.name = "txtSettingValue_" + i;      // give it a name we can check on the server side
+            txtInput.value = ezt_Setting;
+
+            // var text2 = document.createTextNode('Text2');
+
+            td1.appendChild(text1);
+            td2.appendChild(txtInput);
+            td3.appendChild(text3);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+
+            tblSettings.appendChild(tr);
+
+            //var label = document.createElement("label");
+            //var description = document.createTextNode(ezt_SettingName);
+            //var txtInput = document.createElement("input");
+
+            //txtInput.type = "text";    // make the element a checkbox
+            //txtInput.name = "txtSettingValue";      // give it a name we can check on the server side
+            //txtInput.value = ezt_Setting;
+
+            //label.appendChild(description);// add the description to the element
+            //label.appendChild(txtInput);   // add the box to the element
+
+            //// add the label element to your div
+            //document.getElementById(divName).appendChild(label);
+            //document.getElementById(divName).appendChild(document.createElement("br"));
+        }
+
+
+        page_OnLoad();
+
+    </script>
+
+</body>
+</html>
