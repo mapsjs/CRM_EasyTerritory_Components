@@ -117,6 +117,62 @@ EZT.Utilities = EZT.Utilities || { __namespace: true };
         return retval;
     };
 
+    this.IsUserInRole = function (SystemUserId, RoleId) {
+        var retval = false;
+        $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            datatype: "json",
+            url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/SystemUserRolesSet?$select=RoleId,SystemUserId,SystemUserRoleId&$filter=SystemUserId eq guid'" + SystemUserId + "' and RoleId eq guid'" + RoleId + "'&$top=1",
+            beforeSend: function (XMLHttpRequest) {
+                XMLHttpRequest.setRequestHeader("Accept", "application/json");
+            },
+            async: false,
+            success: function (data, textStatus, xhr) {
+                var results = data.d.results;
+                if (results.length == 1) retval = true;
+                else retval = false;
+                //for (var i = 0; i < results.length; i++) {
+                //    var RoleId = results[i].RoleId;
+                //    var SystemUserId = results[i].SystemUserId;
+                //    var SystemUserRoleId = results[i].SystemUserRoleId;
+                //}
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert(textStatus + " " + errorThrown);
+            }
+        });
+        return retval;
+    };
+
+    this.AddUserToRole = function (SystemUserId, RoleId) {
+        var retval = false;
+        var entity = {};
+        // entity.SystemUserRoleId = "0";
+        entity.RoleId = RoleId;
+        entity.SystemUserId = SystemUserId;
+
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            datatype: "json",
+            url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/SystemUserRolesSet",
+            data: JSON.stringify(entity),
+            beforeSend: function (XMLHttpRequest) {
+                XMLHttpRequest.setRequestHeader("Accept", "application/json");
+            },
+            async: false,
+            success: function (data, textStatus, xhr) {
+                var result = data.d;
+                var newEntityId = result.SystemUserRolesId;
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert(textStatus + " " + errorThrown);
+            }
+        });
+        return retval;
+    };
+
     this.sort_by = function (field, reverse, primer) {
 
         var key = primer ?

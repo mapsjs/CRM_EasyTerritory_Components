@@ -5,8 +5,98 @@
     <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
     <script src="../../WebResources/ezt_Utilities.js"></script>
     <script>
+        function btnAssignRoles_OnClick() {
+            var strRoleName = "";
+            var strRoleId = "";
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/RoleSet?$select=Name,RoleId&$top=1",
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                },
+                async: false,
+                success: function (data, textStatus, xhr) {
+                    var results = data.d.results;
+                    if (results.length == 1) {
+                        for (var i = 0; i < results.length; i++) {
+                            strRoleName = results[i].Name;
+                            strRoleId = results[i].RoleId;
+                        }
+                    } else {
+                        // Handle Error, no role found
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/SystemUserSet?$select=FullName,IsIntegrationUser,IsLicensed,SystemUserId&$filter=IsLicensed eq true and IsIntegrationUser eq false",
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                },
+                async: false,
+                success: function (data, textStatus, xhr) {
+                    var results = data.d.results;
+                    for (var i = 0; i < results.length; i++) {
+                        var FullName = results[i].FullName;
+                        var IsIntegrationUser = results[i].IsIntegrationUser;
+                        var IsLicensed = results[i].IsLicensed;
+                        var SystemUserId = results[i].SystemUserId;
+                        if (!EZT.Utilities.IsUserInRole(SystemUserId, strRoleId)) {
+                            
+                        }
+
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+            
+
+            // var tblSettings = document.getElementById("tblSettings");
+            var tblTbody = document.getElementById("tblUserRoles");
+
+            var intNumRows = tblTbody.childNodes.length;
+            var settingsUpdated = false;
+
+            for (var i = 0; i < intNumRows; i++) {
+                var inputTxtSettingName = document.getElementById("td1_" + i.toString()).innerText;
+                var inputTxtSettingValue = document.getElementsByName("txtSettingValue_" + i.toString())[0].value;
+                var inputTxtSettingID = document.getElementById("td3_" + i.toString()).innerText;
+
+                var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
+                // Only update value if it's changed...
+                if (strTestSettingValue.toString().toLowerCase() != inputTxtSettingValue.toLowerCase()) {
+                    updateEZTSettingValue(inputTxtSettingID, inputTxtSettingValue);
+                    settingsUpdated = true;
+
+                }
+
+            }
+
+            if (settingsUpdated) {
+                $("#divPnlUsersSuccess").show();
+                $('#lblUpdateUsersMessage').text("Users Updated...");
+            }
+
+            else {
+                $("#divPnlUsersSuccess").show();
+                $('#lblUpdateUsersMessage').text("No changes to send...");
+            }
+            setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
+        }
+
+
         function btnUpdateSettings_OnClick() {
-            var arrayFormSettings = [];
 
             // var tblSettings = document.getElementById("tblSettings");
             var tblTbody = document.getElementById("tblTbody");
@@ -38,7 +128,7 @@
                 $("#divPnlSuccess").show();
                 $('#lblUpdateMessage').text("No changes to send...");
             }
-            setTimeout(function () {$("#divPnlSuccess").hide();}, 5000);
+            setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
         }
 
         function updateEZTSettingValue(settingGuid, newValue) {
@@ -90,7 +180,7 @@
             border-style: solid;
         }
 
-         .toolbar {
+        .toolbar {
             margin: 20px;
             padding: 5px 10px 5px 10px;
             border-color: #EEE;
@@ -209,6 +299,25 @@
 
                 </tr>
             </tfoot>
+        </table>
+    </div>
+    <div id="pnlAssignUserRoles">
+        <table id="tblUserRoles">
+            <tr>
+                <td class="align-right spaced-top-2x" colspan="2">
+                    <button id="btnAssignRoles" type="button" class="btn" onclick="btnAssignRoles_OnClick()">
+                        Assign All Users the EasyTerritory User Security Role
+                    </button>
+                </td>
+            </tr>
+            <tr id="trUsersSuccess">
+                <td colspan="2">
+                    <div id="divPnlUsersSuccess" hidden="hidden" class="alert alert-success">
+                        <label id="lblUpdateUsersMessage" style="font-size:12pt;">Users Updated...</label>
+                    </div>
+                </td>
+
+            </tr>
         </table>
     </div>
     <script>
