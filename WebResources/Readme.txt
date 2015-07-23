@@ -1,4 +1,5 @@
-﻿
+﻿Install the Dynamics CRM Developer Extentions published by Jason Lattimer
+https://github.com/jlattimer/CRMDeveloperExtensions/wiki
 
 
 Notes:
