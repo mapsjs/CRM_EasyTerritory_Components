@@ -186,6 +186,290 @@ EZT.Utilities = EZT.Utilities || { __namespace: true };
         }
     };
 
+    this.AssociateEntities = function (EntityFilters, LogicalName, MetadataId, RetrieveAsIfPublished, successCallBack, errorCallBack, passThroughObject) {
+        ///<summary>
+        /// Sends an asynchronous RetrieveEntity Request to retrieve a specific entity
+        ///</summary>
+        ///<returns>entityMetadata</returns>
+        ///<param name="EntityFilters" type="Number">
+        /// SDK.Metadata.EntityFilters provides an enumeration for the filters available to filter which data is retrieved.
+        /// Include only those elements of the entity you want to retrieve. Retrieving all parts of all entitities may take significant time.
+        ///</param>
+        ///<param name="LogicalName" optional="true" type="String">
+        /// The logical name of the entity requested. A null value may be used if a MetadataId is provided.
+        ///</param>
+        ///<param name="MetadataId" optional="true" type="String">
+        /// A null value or an empty guid may be passed if a LogicalName is provided.
+        ///</param>
+        ///<param name="RetrieveAsIfPublished" type="Boolean">
+        /// Sets whether to retrieve the metadata that has not been published.
+        ///</param>
+        ///<param name="successCallBack" type="Function">
+        /// The function that will be passed through and be called by a successful response.
+        /// This function must accept the entityMetadata as a parameter.
+        ///</param>
+        ///<param name="errorCallBack" type="Function">
+        /// The function that will be passed through and be called by a failed response.
+        /// This function must accept an Error object as a parameter.
+        ///</param>
+        ///<param name="passThroughObject" optional="true"  type="Object">
+        /// An Object that will be passed through to as the second parameter to the successCallBack.
+        ///</param>
+        if ((typeof EntityFilters != "number") || (EntityFilters < 1 || EntityFilters > 15))
+        { throw new Error("SDK.Metadata.RetrieveEntity EntityFilters must be a SDK.Metadata.EntityFilters value."); }
+        if (LogicalName == null && MetadataId == null) {
+            throw new Error("SDK.Metadata.RetrieveEntity requires either the LogicalName or MetadataId parameter not be null.");
+        }
+        if (LogicalName != null) {
+            if (typeof LogicalName != "string")
+            { throw new Error("SDK.Metadata.RetrieveEntity LogicalName must be a string value."); }
+            MetadataId = "00000000-0000-0000-0000-000000000000";
+        }
+        if (MetadataId != null && LogicalName == null) {
+            if (typeof MetadataId != "string")
+            { throw new Error("SDK.Metadata.RetrieveEntity MetadataId must be a string value."); }
+        }
+        if (typeof RetrieveAsIfPublished != "boolean")
+        { throw new Error("SDK.Metadata.RetrieveEntity RetrieveAsIfPublished must be a boolean value."); }
+        if (typeof successCallBack != "function")
+        { throw new Error("SDK.Metadata.RetrieveEntity successCallBack must be a function."); }
+        if (typeof errorCallBack != "function")
+        { throw new Error("SDK.Metadata.RetrieveEntity errorCallBack must be a function."); }
+        var entityFiltersValue = _evaluateEntityFilters(EntityFilters);
+
+        var entityLogicalNameValueNode = "";
+        if (LogicalName == null)
+        { entityLogicalNameValueNode = "<b:value i:nil=\"true\" />"; }
+        else
+        { entityLogicalNameValueNode = "<b:value i:type=\"c:string\"   xmlns:c=\"http://www.w3.org/2001/XMLSchema\">" + _xmlEncode(LogicalName.toLowerCase()) + "</b:value>"; }
+
+        var request = [
+        "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">",
+          //Allows retrieval if ImageAttributeMetadata objects
+        "<soapenv:Header><a:SdkClientVersion xmlns:a=\"http://schemas.microsoft.com/xrm/2011/Contracts\">6.0</a:SdkClientVersion></soapenv:Header>",
+         "<soapenv:Body>",
+         "<Execute xmlns=\"http://schemas.microsoft.com/xrm/2011/Contracts/Services\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\">",
+          
+              "  <Request xsi:type='AssociateEntitiesRequest'>",
+              "    <Moniker1>",
+              "      <Name xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity1SchemaName + "</Name>",
+              "      <Id xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity1KeyValue + "</Id>",
+              "    </Moniker1>",
+              "    <Moniker2>",
+              "      <Name xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity2SchemaName + "</Name>",
+              "      <Id xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity2KeyValue + "</Id>",
+              "    </Moniker2>",
+              "    <RelationshipName>" + relationshipSchemaName + "</RelationshipName>",
+              "  </Request>",
+              "</Execute>",
+         "</soapenv:Body>",
+        "</soapenv:Envelope>"].join("");
+        var req = new XMLHttpRequest();
+        req.open("POST", _getUrl() + "/XRMServices/2011/Organization.svc/web", true);
+        try { req.responseType = 'msxml-document' } catch (e) { }
+        req.setRequestHeader("Accept", "application/xml, text/xml, */*");
+        req.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+        req.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute");
+        req.onreadystatechange = function () {
+            if (req.readyState == 4 /* complete */) {
+                req.onreadystatechange = null; //Addresses potential memory leak issue with IE
+                if (req.status == 200) {
+                    var doc = req.responseXML;
+                    try { _setSelectionNamespaces(doc); } catch (e) { }
+                    var a = _objectifyNode(_selectSingleNode(doc, "//b:value"));
+                    a._type = "EntityMetadata";
+                    successCallBack(a, passThroughObject);
+                }
+                else {
+                    //Failure
+                    errorCallBack(_getError(req));
+                }
+            }
+
+        };
+        req.send(request);
+
+
+    };
+
+
+
 }).call(EZT.Utilities);
 /* End EZT.Utilities */
 /* ====================================================== */
+
+
+///* ====================================================== */
+//// from http://crmentropy.blogspot.com/2010/09/nn-relationship-utility-code-javascript.html
+//// 
+
+//function MischiefMayhemSOAP(serviceUrl, xmlSoapBody, soapActionHeader, suppressError) {
+//    var xmlReq = "<?xml version='1.0' encoding='utf-8'?>"
+//      + "<soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'"
+//      + "  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'"
+//      + "  xmlns:xsd='http://www.w3.org/2001/XMLSchema'>"
+//      + GenerateAuthenticationHeader()
+//      + "  <soap:Body>"
+//      + xmlSoapBody
+//      + "  </soap:Body>"
+//      + "</soap:Envelope>";
+
+//    var httpObj = new ActiveXObject("Msxml2.XMLHTTP");
+
+//    httpObj.open("POST", serviceUrl, false);
+
+//    httpObj.setRequestHeader("SOAPAction", soapActionHeader);
+//    httpObj.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+//    httpObj.setRequestHeader("Content-Length", xmlReq.length);
+
+//    httpObj.send(xmlReq);
+
+//    var resultXml = httpObj.responseXML;
+
+//    var errorCount = resultXml.selectNodes("//error").length;
+//    if (errorCount != 0) {
+//        var msg = resultXml.selectSingleNode("//description").nodeTypedValue;
+
+//        if (typeof (suppressError) == "undefined" || suppressError == null) {
+//            alert("The following error was encountered: " + msg);
+//        }
+
+//        return null;
+//    } else {
+//        return resultXml;
+//    }
+//}
+
+//// FetchEncode is borrowed from the _HtmlEncode function from Microsoft's CRM scripts
+//function FetchEncode(fetchXml) {
+//    var c;
+//    var HtmlEncode = '';
+//    var buffer = '';
+//    var bufferLength = 500;
+//    var count = 0;
+
+//    if (fetchXml == null) {
+//        return null;
+//    }
+
+//    if (fetchXml == '') {
+//        return '';
+//    }
+
+//    for (var cnt = 0; cnt < fetchXml.length; cnt++) {
+//        c = fetchXml.charCodeAt(cnt);
+
+//        if (((c > 96) && (c < 123)) ||
+//          ((c > 64) && (c < 91)) ||
+//          (c == 32) ||
+//          ((c > 47) && (c < 58)) ||
+//          (c == 46) ||
+//          (c == 44) ||
+//          (c == 45) ||
+//          (c == 95)) {
+//            buffer += String.fromCharCode(c);
+//        } else {
+//            buffer += '&#' + c + ';';
+//        }
+
+//        if (++count == bufferLength) {
+//            HtmlEncode += buffer;
+//            buffer = '';
+//            count = 0;
+//        }
+//    }
+
+//    if (buffer.length) {
+//        HtmlEncode += buffer;
+//    }
+
+//    return HtmlEncode;
+//}
+
+//function Fetch(fetchXml) {
+//    var xmlSoapBody = "<Fetch xmlns='http://schemas.microsoft.com/crm/2007/WebServices'>"
+//      + "  <fetchXml>"
+//      + FetchEncode(fetchXml)
+//      + "  </fetchXml>"
+//      + "</Fetch>";
+
+//    var fetchResponse = MischiefMayhemSOAP("/MSCRMServices/2007/CrmService.asmx", xmlSoapBody, "http://schemas.microsoft.com/crm/2007/WebServices/Fetch");
+
+//    if (fetchResponse != null) {
+//        var fetchResults = new ActiveXObject("Msxml2.DOMDocument");
+
+//        fetchResults.async = false;
+//        fetchResults.resolveExternals = false;
+//        fetchResults.loadXML(fetchResponse.text);
+
+//        return fetchResults;
+//    } else {
+//        return null;
+//    }
+//}
+
+//function DoesNNRelationshipExist(relationshipSchemaName, entity1SchemaName, entity1KeyValue, entity2SchemaName, entity2KeyValue) {
+//    var fetchXml = "<fetch mapping='logical'>"
+//      + "  <entity name='" + relationshipSchemaName + "'>"
+//      + "    <all-attributes />"
+//      + "    <filter>"
+//      + "      <condition attribute='" + entity1SchemaName + "id' operator='eq' value ='" + entity1KeyValue + "' />"
+//      + "      <condition attribute='" + entity2SchemaName + "id' operator='eq' value='" + entity2KeyValue + "' />"
+//      + "    </filter>"
+//      + "  </entity>"
+//      + "</fetch>";
+
+//    var fetchResults = Fetch(fetchXml);
+
+//    var nodeList = fetchResults.selectNodes("resultset/result");
+
+//    if (nodeList == null || nodeList.length == 0) {
+//        return false;
+//    } else {
+//        return true;
+//    }
+//}
+
+//function AssociateEntities(relationshipSchemaName, entity1SchemaName, entity1KeyValue, entity2SchemaName, entity2KeyValue, skipCheck) {
+//    if ((typeof skipCheck != "undefined" && skipCheck) || !DoesNNRelationshipExist(relationshipSchemaName, entity1SchemaName, entity1KeyValue, entity2SchemaName, entity2KeyValue)) {
+//        var xmlSoapBody = "<Execute xmlns='http://schemas.microsoft.com/crm/2007/WebServices'>"
+//          + "  <Request xsi:type='AssociateEntitiesRequest'>"
+//          + "    <Moniker1>"
+//          + "      <Name xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity1SchemaName + "</Name>"
+//          + "      <Id xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity1KeyValue + "</Id>"
+//          + "    </Moniker1>"
+//          + "    <Moniker2>"
+//          + "      <Name xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity2SchemaName + "</Name>"
+//          + "      <Id xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity2KeyValue + "</Id>"
+//          + "    </Moniker2>"
+//          + "    <RelationshipName>" + relationshipSchemaName + "</RelationshipName>"
+//          + "  </Request>"
+//          + "</Execute>";
+
+//        MischiefMayhemSOAP("/MSCRMServices/2007/CrmService.asmx", xmlSoapBody, "http://schemas.microsoft.com/crm/2007/WebServices/Execute");
+//    }
+//}
+
+//function DisassociateEntities(relationshipSchemaName, entity1SchemaName, entity1KeyValue, entity2SchemaName, entity2KeyValue, skipCheck) {
+//    if ((typeof skipCheck != "undefined" && skipCheck) || DoesNNRelationshipExist(relationshipSchemaName, entity1SchemaName, entity1KeyValue, entity2SchemaName, entity2KeyValue)) {
+//        var xmlSoapBody = "<Execute xmlns='http://schemas.microsoft.com/crm/2007/WebServices'>"
+//          + "  <Request xsi:type='DisassociateEntitiesRequest'>"
+//          + "    <Moniker1>"
+//          + "      <Name xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity1SchemaName + "</Name>"
+//          + "      <Id xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity1KeyValue + "</Id>"
+//          + "    </Moniker1>"
+//          + "    <Moniker2>"
+//          + "      <Name xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity2SchemaName + "</Name>"
+//          + "      <Id xmlns='http://schemas.microsoft.com/crm/2006/CoreTypes'>" + entity2KeyValue + "</Id>"
+//          + "    </Moniker2>"
+//          + "    <RelationshipName>" + relationshipSchemaName + "</RelationshipName>"
+//          + "  </Request>"
+//          + "</Execute>";
+
+//        MischiefMayhemSOAP("/MSCRMServices/2007/CrmService.asmx", xmlSoapBody, "http://schemas.microsoft.com/crm/2007/WebServices/Execute");
+//    }
+//}
+
+///* End SoapStuff */
+///* ====================================================== */
+
