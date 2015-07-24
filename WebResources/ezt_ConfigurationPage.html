@@ -241,8 +241,6 @@
                 <tr style="background-color:white;">
                     <td colspan="2">
                         <img src="../../WebResources/EZT_logo_256x55.png" />
-                        <!--</td>-->
-                        <!--<td class="align-right spaced-top-2x">-->
                         <button id="btnUpdateSettings" type="button" class="btn align-right" onclick="btnUpdateSettings_OnClick()">
                             Update Settings
                         </button>
@@ -351,7 +349,7 @@
         };
 
         function addSettingTableRow(divName, ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i) {
-            // var tblSettings = document.getElementById("tblSettings");
+            
             var tblSettings = document.getElementById("tblTbody");
 
             var tr = document.createElement('tr');
@@ -364,8 +362,8 @@
             text1.nodeName = "txtSetting_" + i;
 
             var txtInput = document.createElement("input");
-            txtInput.type = "text";    // make the element a checkbox
-            txtInput.name = "txtSettingValue_" + i;      // give it a name we can check on the server side
+            txtInput.type = "text";    
+            txtInput.name = "txtSettingValue_" + i;      
             txtInput.value = ezt_Setting;
 
             td1.appendChild(text1);

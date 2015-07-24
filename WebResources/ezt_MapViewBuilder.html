@@ -23,6 +23,9 @@
 
             var listLength = cbViews.children.length;
 
+            // Increment through the list of checkbox items and labels
+            // Note: Have to do an i+=2 since we get both check boxes and labels
+            // and we only need if the checkbox is checked
             for (var i = 0; i < listLength; i += 2) {
                 if (cbViews.children[i].children[0].checked) {
                     var strLabelValue = cbViews.children[i].children[0].value;
@@ -66,12 +69,14 @@
                     // window.open here using project id
                     window.open(eztEndpoint + '/index.html?projectId=' + projectId);
                 });
+
+                // Make the 'loading' panel go away after a few seconds
                 setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
 
             } else {
                 $("#divPnlSuccess").hide();
                 $("#divPnlMessage").show();
-                $('#lblMessage').text("No Views were selected!\r\nPlease select at least one view to map.");
+                $('#lblMessage').text("No Views were selected! Please select at least one view to map.");
             }
 
         };
@@ -128,7 +133,7 @@
             background-color: yellow;
         }
 
-         .alert-success {
+        .alert-success {
             color: black;
             background-color: greenyellow;
             /*width: 400px;*/
@@ -141,7 +146,6 @@
             border-radius: 10px;
             width: 680px;
         }
-
     </style>
 </head>
 <body>
@@ -151,13 +155,14 @@
     <div id="pnlSelectViews">
         <table>
             <thead>
-                <tr style="background-color:white;"><td><img src="../../WebResources/EZT_logo_256x55.png" /></td>
+                <tr style="background-color:white;">
+                    <td><img src="../../WebResources/EZT_logo_256x55.png" /></td>
                     <td class="align-right spaced-top-2x">
                         <button id="btnSubmit" type="button" class="btn" onclick="btnMapViews_OnClick()">
                             Map Selected Views
                         </button>
                     </td>
-</tr>
+                </tr>
                 <tr>
                     <td colspan="2">
                         Select views to map with EasyTerritory
@@ -166,7 +171,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td  colspan="2">
+                    <td colspan="2">
                         <div id="divCheckList" class="checkList">
 
                         </div>
@@ -218,6 +223,7 @@
                 // ( substringof('address1_latitude',FetchXml) or  substringof('new_latitude',FetchXml))
                 // and ( substringof('new_longitude',FetchXml) or  substringof('address1_longitude',FetchXml))";
 
+                // build the or statement to check for latitude columns
                 if (strArrayLats.length > 0) {
                     strFilter = strFilter + " and ( "
                     for (var i = 0; i < strArrayLats.length; i++) {
@@ -228,6 +234,7 @@
                     strFilter = strFilter + ")"
                 }
 
+                // build the or statement to check for longitude columns
                 if (strArrayLons.length > 0) {
                     strFilter = strFilter + " and ( "
                     for (var i = 0; i < strArrayLons.length; i++) {
@@ -239,6 +246,7 @@
                 }
                 strURL = strURL + strColumnSet + strFilter;
 
+                // query 'system' views with any of these columns
                 $.ajax({
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
@@ -270,6 +278,8 @@
                     }
                 });
 
+                // query 'user' saved views with any of these columns
+                // Note: This should only return views that the current user has rights to see.
                 strURL = Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/UserQuerySet?";
                 strColumnSet = "$select=FetchXml,Name,QueryType,UserQueryId,ReturnedTypeCode";
                 strURL = strURL + strColumnSet + strFilter;
@@ -298,12 +308,10 @@
 
                         }
 
+                        // Need to get the 'friendly' name for ech entity from the CRM Metadata
                         var counter = arrayWorkingList.length;
-
                         var updateEntityFriendlyName = function (list, index) {
-
                             var entityName = list[index].entitySDKName;
-
                             SDK.Metadata.RetrieveEntity(
                                 SDK.Metadata.EntityFilters.Attributes,
                                 entityName,
@@ -318,11 +326,11 @@
 
                         };
 
+                        // Build the list of checkbox items for the user to select from
                         var buildCheckBoxList = function () {
                             // Sort the results
                             arrayWorkingList.sort(EZT.Utilities.sort_by('entityFriendlyName', false, function (a) { return a.toUpperCase() }));
                             for (var i = 0; i < arrayWorkingList.length; i++) {
-                                // var entitySDKName = arrayWorkingList[i].entitySDKName;
                                 var entityFriendlyName = arrayWorkingList[i].entityFriendlyName;
                                 var viewName = arrayWorkingList[i].viewName;
                                 var queryId = arrayWorkingList[i].queryId;
@@ -374,15 +382,15 @@
             var description = document.createTextNode(" " + strCBLabel);
             var checkbox = document.createElement("input");
 
-            checkbox.type = "checkbox";    // make the element a checkbox
-            checkbox.name = "cbViews";      // give it a name we can check on the server side
+            checkbox.type = "checkbox";
+            checkbox.name = "cbViews";
             checkbox.value = viewType + "|" + SavedQueryId + "|" + fetchXML;
 
             // TODO:  Figure out how to make this work...
             // checkbox.onkeyup = 'checkEnableButton()';
 
-            label.appendChild(checkbox);   // add the box to the element
-            label.appendChild(description);// add the description to the element
+            label.appendChild(checkbox);
+            label.appendChild(description);
 
             // add the label element to your div
             document.getElementById(divName).appendChild(label);
