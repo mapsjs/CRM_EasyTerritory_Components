@@ -151,16 +151,22 @@
     <div id="pnlSelectViews">
         <table>
             <thead>
-                <tr style="background-color:white;"><td><img src="../../WebResources/EZT_logo_256x55.png" /></td></tr>
+                <tr style="background-color:white;"><td><img src="../../WebResources/EZT_logo_256x55.png" /></td>
+                    <td class="align-right spaced-top-2x">
+                        <button id="btnSubmit" type="button" class="btn" onclick="btnMapViews_OnClick()">
+                            Map Selected Views
+                        </button>
+                    </td>
+</tr>
                 <tr>
-                    <td>
+                    <td colspan="2">
                         Select views to map with EasyTerritory
                     </td>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>
+                    <td  colspan="2">
                         <div id="divCheckList" class="checkList">
 
                         </div>
@@ -168,15 +174,15 @@
                 </tr>
             </tbody>
             <tfoot>
-                <tr>
+                <!--<tr>
                     <td class="align-right spaced-top-2x">
                         <button id="btnSubmit" type="button" class="btn" onclick="btnMapViews_OnClick()">
                             Map Selected Views
                         </button>
                     </td>
-                </tr>
+                </tr>-->
                 <tr id="trSuccess">
-                    <td >
+                    <td colspan="2">
                         <div id="divPnlSuccess" hidden="hidden" class="alert alert-success align-right" style="width:90%;">
                             <label id="lblUpdateMessage" style="font-size:12pt;">Loading EasyTerritory...</label>
                         </div>

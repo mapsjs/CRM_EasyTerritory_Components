@@ -68,6 +68,30 @@ EZT.Utilities = EZT.Utilities || { __namespace: true };
     //         ///</summary>
     //         alert("An Error occurred.<br />" + error.message);
     //     };
+    this.updateEZTSettingValue = function(settingGuid, newValue) {
+        var entity = {};
+        entity.ezt_Setting = newValue;
+
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            datatype: "json",
+            url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet(guid'" + settingGuid + "')",
+            data: JSON.stringify(entity),
+            beforeSend: function (XMLHttpRequest) {
+                XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
+            },
+            async: false,
+            success: function (data, textStatus, xhr) {
+
+                // alert("Updated"); //Success - No Return Data - Do Something
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert(textStatus + " " + errorThrown);
+            }
+        });
+    };
 
     this.sortSelect = function (selElem) {
         var tmpAry = new Array();

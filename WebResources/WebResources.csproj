@@ -43,7 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ezt_ConfigurationPage.html" />
-    <Content Include="ezt_DefaultSettings.xml" />
     <Content Include="ezt_icon_16x16.png" />
     <Content Include="ezt_icon_32x32.png" />
     <Content Include="ezt_logo_128x28.png" />
