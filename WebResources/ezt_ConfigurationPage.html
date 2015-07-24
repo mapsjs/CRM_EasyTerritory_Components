@@ -126,7 +126,7 @@
             setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
         }
 
-        
+
 
     </script>
     <style>
@@ -138,6 +138,7 @@
 
         .align-right {
             text-align: right;
+            float: right;
         }
 
         spaced-2x, .spaced-v-2x, .spaced-top-2x {
@@ -148,7 +149,7 @@
             margin: 20px;
             padding: 10px;
             border-color: #EEE;
-            width: 800px;
+            width: 95%;
             border-style: solid;
         }
 
@@ -156,7 +157,7 @@
             margin: 20px;
             padding: 5px 10px 5px 10px;
             border-color: #EEE;
-            width: 800px;
+            width: 95%;
             border-style: solid;
         }
 
@@ -216,6 +217,11 @@
         input {
             width: 100%;
         }
+
+        img {
+            border: none;
+            outline: none;
+        }
     </style>
 
 </head>
@@ -224,7 +230,7 @@
         <table class="toolbar">
             <tr>
                 <td>
-                    <a href="../../WebResources/ezt_MapViewBuilder"><img src="../../WebResources/ezt_Map_Icon_16_16" />&nbsp;Map View Builder</a>
+                    <a href="../../WebResources/ezt_MapViewBuilder"><img src="../../WebResources/ezt_Map_Icon_16_16" /></a>&nbsp;<a href="../../WebResources/ezt_MapViewBuilder">Map View Builder</a>
                 </td>
             </tr>
         </table>
@@ -233,17 +239,17 @@
         <table id="tblSettings">
             <thead>
                 <tr style="background-color:white;">
-                    <td colspan="1">
+                    <td colspan="2">
                         <img src="../../WebResources/EZT_logo_256x55.png" />
-                    </td>
-                    <td class="align-right spaced-top-2x">
-                        <button id="btnUpdateSettings" type="button" class="btn" onclick="btnUpdateSettings_OnClick()">
+                        <!--</td>-->
+                        <!--<td class="align-right spaced-top-2x">-->
+                        <button id="btnUpdateSettings" type="button" class="btn align-right" onclick="btnUpdateSettings_OnClick()">
                             Update Settings
                         </button>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3">
+                    <td colspan="2">
                         Review EasyTerritory Settings
                     </td>
                 </tr>
@@ -252,12 +258,10 @@
                     <td class="settingRow settingRowHeader">Setting Value</td>
                 </tr>
             </thead>
-            <tbody id="tblTbody">
-
-            </tbody>
+            <tbody id="tblTbody"></tbody>
             <tfoot>
                 <tr id="trSuccess">
-                    <td colspan="3">
+                    <td colspan="2">
                         <div id="divPnlSuccess" hidden="hidden" class="alert alert-success">
                             <label id="lblUpdateMessage" style="font-size:12pt;">Settings Updated...</label>
                         </div>
@@ -349,7 +353,7 @@
         function addSettingTableRow(divName, ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i) {
             // var tblSettings = document.getElementById("tblSettings");
             var tblSettings = document.getElementById("tblTbody");
-            
+
             var tr = document.createElement('tr');
 
             var td1 = document.createElement('td');
@@ -379,7 +383,7 @@
             hidInput.id = "hidden_" + i;
             hidInput.name = 'guid_' + i;
             divHiddenData.appendChild(hidInput);
-            
+
         }
 
 
