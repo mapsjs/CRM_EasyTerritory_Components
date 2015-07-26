@@ -226,6 +226,9 @@
 
 </head>
 <body>
+    <div id="divPnlMessage" hidden="hidden" class="alert alert-danger">
+        <label id="lblMessage" style="font-size:16pt;">...</label>
+    </div>
     <div id="divPnlTools">
         <table class="toolbar">
             <tr>
@@ -284,42 +287,50 @@
             var strLonFields = EZT.Utilities.getEZTSetting("crmAdvFindLonFields");
             var eztEndpoint = EZT.Utilities.getEZTSetting("EZT Instance URL");
 
-            if (strLatFields == "NoSettingReturned") {
-                setDefaultValue("crmAdvFindLatFields", "new_latitude,new_lat,address1_latitude");
+            if (strLatFields == "Forbidden" || strLonFields == "Forbidden" || eztEndpoint == "Forbidden") {
+                $("#divPnlTools").hide();
+                $("#pnlSettings").hide();
+                $("#divPnlMessage").show();
+                $('#lblMessage').text("Current User does not have sufficient security rights to read EasyTerritory Settings.\r\n\r\nPlease contact your administrator and request that Read access be granted to the EasyTerritory Settings entity.");
             }
-
-            if (strLonFields == "NoSettingReturned") {
-                setDefaultValue("crmAdvFindLonFields", "new_longitude,new_lon,address1_longitude");
-            }
-
-            if (eztEndpoint == "NoSettingReturned") {
-                setDefaultValue("EZT Instance URL", "https://apps.easyterritory.com/GUID/APP");
-            }
-
-            // Retrieve the current settings
-            $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                datatype: "json",
-                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet?$select=ezt_easyterritorysettingsId,ezt_Setting,ezt_SettingName,ModifiedOn",
-                beforeSend: function (XMLHttpRequest) {
-                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
-                },
-                async: true,
-                success: function (data, textStatus, xhr) {
-                    var results = data.d.results;
-                    for (var i = 0; i < results.length; i++) {
-                        var ezt_easyterritorysettingsId = results[i].ezt_easyterritorysettingsId;
-                        var ezt_SettingName = results[i].ezt_SettingName;
-                        var ezt_Setting = results[i].ezt_Setting;
-                        var dtModifiedOn = results[i].ModifiedOn;
-                        addSettingTableRow("divSettings", ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i.toString());
-                    }
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    alert(textStatus + " " + errorThrown);
+            else {
+                if (strLatFields == "NoSettingReturned") {
+                    setDefaultValue("crmAdvFindLatFields", "new_latitude,new_lat,address1_latitude");
                 }
-            });
+
+                if (strLonFields == "NoSettingReturned") {
+                    setDefaultValue("crmAdvFindLonFields", "new_longitude,new_lon,address1_longitude");
+                }
+
+                if (eztEndpoint == "NoSettingReturned") {
+                    setDefaultValue("EZT Instance URL", "https://apps.easyterritory.com/GUID/APP");
+                }
+
+                // Retrieve the current settings
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet?$select=ezt_easyterritorysettingsId,ezt_Setting,ezt_SettingName,ModifiedOn",
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                    },
+                    async: true,
+                    success: function (data, textStatus, xhr) {
+                        var results = data.d.results;
+                        for (var i = 0; i < results.length; i++) {
+                            var ezt_easyterritorysettingsId = results[i].ezt_easyterritorysettingsId;
+                            var ezt_SettingName = results[i].ezt_SettingName;
+                            var ezt_Setting = results[i].ezt_Setting;
+                            var dtModifiedOn = results[i].ModifiedOn;
+                            addSettingTableRow("divSettings", ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i.toString());
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert(textStatus + " " + errorThrown);
+                    }
+                });
+            }
 
         }; // end page_OnLoad
 
@@ -349,7 +360,7 @@
         };
 
         function addSettingTableRow(divName, ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i) {
-            
+
             var tblSettings = document.getElementById("tblTbody");
 
             var tr = document.createElement('tr');
@@ -362,8 +373,8 @@
             text1.nodeName = "txtSetting_" + i;
 
             var txtInput = document.createElement("input");
-            txtInput.type = "text";    
-            txtInput.name = "txtSettingValue_" + i;      
+            txtInput.type = "text";
+            txtInput.name = "txtSettingValue_" + i;
             txtInput.value = ezt_Setting;
 
             td1.appendChild(text1);

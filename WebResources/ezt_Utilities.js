@@ -134,7 +134,8 @@ EZT.Utilities = EZT.Utilities || { __namespace: true };
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                alert(textStatus + " " + errorThrown);
+                if (errorThrown = "Forbidden") retval = "Forbidden";
+                else alert("An error has occurred: " + textStatus + " :: " + errorThrown);
             }
         });
 
