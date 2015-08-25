@@ -2,6 +2,16 @@
 
     // var eztEndpoint = 'https://democrm.easyterritory.com/APP';
     var eztEndpoint = getEZTSetting("EZT Instance URL");
+    var strLatFields = getEZTSetting("crmAdvFindLatFields");
+    var strLonFields = getEZTSetting("crmAdvFindLonFields");
+
+    if (eztEndpoint == "Forbidden" || strLatFields == "Forbidden" || strLonFields == "Forbidden") {
+        txt = "There was an error on this page.\n\n";
+        txt += "Current User does not have sufficient security rights to read EasyTerritory Settings.\r\n\r\nPlease contact your administrator and request that Read access be granted to the EasyTerritory Settings entity.\n\n";
+        txt += "Click OK to continue.\n\n";
+        alert(txt);
+        return;
+    }
 
     // using the user guid as the project id prevents the creation of endless hidden projects in the system that never get deleted
     // it also ensure concurrent user protection
@@ -15,43 +25,81 @@
             //get FetchXML 
             var advFind = _mainWindow.$find("advFind"), iOldMode = advFind.get_fetchMode();
             var sFetchXml = advFind.get_fetchXml();
+
             //get related information 
             var theFetchXml = sFetchXml;
             var LayoutXml = theFetchXml.LayoutXml;
-            //var EntityName = theFetchXml.EntityName;
-            //var DefaultAdvFindViewId = theFetchXml.DefaultAdvancedFindViewId;
-            //var ViewId = theFetchXml.QueryId;
-            //var ViewType = theFetchXml.QueryObjectType;
 
-            //new project object
-            var project = {
-                id: userGuid,
-                customJson: JSON.stringify({
-                    type: 'fetchXml',
-                    data: theFetchXml
-                }),
-                allowOverwrite: true,
-                unlisted: true,
-                label: 'Advanced Find Results'
-            };
+            var boolLatFound = false;
+            var strArrayLats = strLatFields.split(',');
+            if (strArrayLats.length > 0) {
+                for (var i = 0; i < strArrayLats.length; i++) {
+                    var testFetchXml1 = theFetchXml.toLowerCase();
+                    if (testFetchXml1.search(strArrayLats[i].toLowerCase()) != -1) {
+                        boolLatFound = true;
+                        break;
+                    }
+                }
+            }
 
-            // call ezt rest service to create a new project
-            var call = $.ajax({
-                url: eztEndpoint + '/REST/Project',
-                type: 'POST',
-                cache: false,
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(project)
-            });
+            var boolLonFound = false;
+            var strArrayLons = strLonFields.split(',');
+            if (strArrayLons.length > 0) {
+                for (var i = 0; i < strArrayLons.length; i++) {
+                    var testFetchXml2 = theFetchXml.toLowerCase();
+                    if (testFetchXml2.search(strArrayLons[i].toLowerCase()) != -1) {
+                        boolLonFound = true;
+                        break;
+                    }
+                }
+            }
 
-            // returns newly created project id
-            call.done(function (data) {
 
-                var projectId = data.id;
+            if (boolLatFound == true && boolLonFound == true) {
+                //new project object
+                var project = {
+                    id: userGuid,
+                    customJson: JSON.stringify({
+                        type: 'fetchXml',
+                        data: theFetchXml
+                    }),
+                    allowOverwrite: true,
+                    unlisted: true,
+                    label: 'Advanced Find Results'
+                };
 
-                // do your window.open here using the above project id
-                window.open(eztEndpoint + '/index.html?projectId=' + projectId);
-            });
+                // call ezt rest service to create a new project
+                var call = $.ajax({
+                    url: eztEndpoint + '/REST/Project',
+                    type: 'POST',
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(project)
+                });
+
+                // returns newly created project id
+                call.done(function (data) {
+
+                    var projectId = data.id;
+
+                    // do your window.open here using the above project id
+                    window.open(eztEndpoint + '/index.html?projectId=' + projectId);
+                });
+            }
+            else {
+                txt = "ERROR: There was an problem mapping these records.\n\n";
+                if (boolLatFound == false) {
+                    txt += "This Advanced find does NOT contain any [Latitude] fields.\r\n";
+                }
+                if (boolLonFound == false) {
+                    txt += "This Advanced find does NOT contain any [Longitude] fields.\r\n";
+                }
+                txt += "Please add the Latitude and/or Longitude fields to the query, or contact your Administrator if there are new Latitude/Longitude fields defined for this entity that are not defined in the EasyTerritory Settings entity.\n\n";
+                txt += "Click OK to continue.\n\n";
+                alert(txt);
+                return;
+
+            }
 
         } catch (err) {
             txt = "There was an error on this page.\n\n";
