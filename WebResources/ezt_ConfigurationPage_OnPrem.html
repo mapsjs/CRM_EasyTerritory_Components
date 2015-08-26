@@ -1,0 +1,404 @@
+﻿<html>
+<head>
+    <meta charset="utf-8">
+
+    <script src="../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <script src="../WebResources/ezt_Utilities.js" type="text/javascript"></script>
+    <script>
+        function btnUpdateSettings_OnClick() {
+            var tblTbody = document.getElementById("tblTbody");
+            var intNumRows = tblTbody.children.length;
+            var settingsUpdated = false;
+
+            for (var i = 0; i < intNumRows; i++) {
+                var inputTxtSettingName = document.getElementById("td1_" + i.toString()).innerText;
+                var inputTxtSettingValue = document.getElementsByName("txtSettingValue_" + i.toString())[0].value;
+                var inputTxtSettingID = document.getElementById("hidden_" + i.toString()).value;
+
+                var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
+                // Only update value if it's changed...
+                if (strTestSettingValue.toString().toLowerCase() != inputTxtSettingValue.toLowerCase()) {
+                    EZT.Utilities.updateEZTSettingValue(inputTxtSettingID, inputTxtSettingValue);
+                    settingsUpdated = true;
+                }
+
+            }
+
+            if (settingsUpdated) {
+                $("#divPnlSuccess").show();
+                $('#lblUpdateMessage').text("Settings Updated...");
+            }
+
+            else {
+                $("#divPnlSuccess").show();
+                $('#lblUpdateMessage').text("No changes to send...");
+            }
+            setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
+        }
+
+        function btnAssignRoles_OnClick() {
+            var strRoleName = "";
+            var strRoleId = "";
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/RoleSet?$select=Name,RoleId&$top=1",
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                },
+                async: false,
+                success: function (data, textStatus, xhr) {
+                    var results = data.d.results;
+                    if (results.length == 1) {
+                        for (var i = 0; i < results.length; i++) {
+                            strRoleName = results[i].Name;
+                            strRoleId = results[i].RoleId;
+                        }
+                    } else {
+                        // Handle Error, no role found
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/SystemUserSet?$select=FullName,IsIntegrationUser,IsLicensed,SystemUserId&$filter=IsLicensed eq true and IsIntegrationUser eq false",
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                },
+                async: false,
+                success: function (data, textStatus, xhr) {
+                    var results = data.d.results;
+                    for (var i = 0; i < results.length; i++) {
+                        var FullName = results[i].FullName;
+                        var IsIntegrationUser = results[i].IsIntegrationUser;
+                        var IsLicensed = results[i].IsLicensed;
+                        var SystemUserId = results[i].SystemUserId;
+                        if (!EZT.Utilities.IsUserInRole(SystemUserId, strRoleId)) {
+
+                        }
+
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+
+
+            // var tblSettings = document.getElementById("tblSettings");
+            var tblTbody = document.getElementById("tblUserRoles");
+
+            var intNumRows = tblTbody.childNodes.length;
+            var settingsUpdated = false;
+
+            for (var i = 0; i < intNumRows; i++) {
+                var inputTxtSettingName = document.getElementById("td1_" + i.toString()).innerText;
+                var inputTxtSettingValue = document.getElementsByName("txtSettingValue_" + i.toString())[0].value;
+                var inputTxtSettingID = document.getElementById("td3_" + i.toString()).innerText;
+
+                var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
+                // Only update value if it's changed...
+                if (strTestSettingValue.toString().toLowerCase() != inputTxtSettingValue.toLowerCase()) {
+                    updateEZTSettingValue(inputTxtSettingID, inputTxtSettingValue);
+                    settingsUpdated = true;
+
+                }
+
+            }
+
+            if (settingsUpdated) {
+                $("#divPnlUsersSuccess").show();
+                $('#lblUpdateUsersMessage').text("Users Updated...");
+            }
+
+            else {
+                $("#divPnlUsersSuccess").show();
+                $('#lblUpdateUsersMessage').text("No changes to send...");
+            }
+            setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
+        }
+
+
+
+    </script>
+    <style>
+        body {
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .align-right {
+            text-align: right;
+            float: right;
+        }
+
+        spaced-2x, .spaced-v-2x, .spaced-top-2x {
+            margin-top: 16px;
+        }
+
+        table {
+            margin: 20px;
+            padding: 10px;
+            border-color: #EEE;
+            width: 95%;
+            border-style: solid;
+        }
+
+        .toolbar {
+            margin: 20px;
+            padding: 5px 10px 5px 10px;
+            border-color: #EEE;
+            width: 95%;
+            border-style: solid;
+        }
+
+        thead tr {
+            background-color: #EEE;
+            border-color: #EEE;
+            border-style: solid;
+        }
+
+        td {
+            margin: 20px;
+            padding: 10px;
+        }
+
+        .checkList {
+            width: 95%;
+            overflow: auto;
+            overflow-x: hidden;
+            height: 200px;
+        }
+
+        .btn {
+            margin-right: 8px;
+            padding: 10px;
+        }
+
+        .alert-danger {
+            color: black;
+            background-color: yellow;
+        }
+
+        .alert-success {
+            color: black;
+            background-color: greenyellow;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 20px;
+            /*border: 1px solid black;*/
+            border-radius: 5px;
+            /*width: 580px;*/
+        }
+
+        .settingNameRow {
+            width: 15%;
+        }
+
+        .settingRowHeader {
+            background-color: yellow;
+        }
+
+        .settingRow {
+            width: 84%;
+        }
+
+        input {
+            width: 100%;
+        }
+
+        img {
+            border: none;
+            outline: none;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="divPnlMessage" hidden="hidden" class="alert alert-danger">
+        <label id="lblMessage" style="font-size:16pt;">...</label>
+    </div>
+    <div id="divPnlTools">
+        <table class="toolbar">
+            <tr>
+                <td>
+                    <a href="../WebResources/ezt_MapViewBuilder"><img src="../WebResources/ezt_Map_Icon_16_16" /></a>&nbsp;<a href="../WebResources/ezt_MapViewBuilder">Map View Builder</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="pnlSettings">
+        <table id="tblSettings">
+            <thead>
+                <tr style="background-color:white;">
+                    <td colspan="2">
+                        <img src="../WebResources/EZT_logo_256x55.png" />
+                        <button id="btnUpdateSettings" type="button" class="btn align-right" onclick="btnUpdateSettings_OnClick()">
+                            Update Settings
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        Review EasyTerritory Settings
+                    </td>
+                </tr>
+                <tr>
+                    <td class="settingNameRow settingRowHeader">Setting Name</td>
+                    <td class="settingRow settingRowHeader">Setting Value</td>
+                </tr>
+            </thead>
+            <tbody id="tblTbody"></tbody>
+            <tfoot>
+                <tr id="trSuccess">
+                    <td colspan="2">
+                        <div id="divPnlSuccess" hidden="hidden" class="alert alert-success">
+                            <label id="lblUpdateMessage" style="font-size:12pt;">Settings Updated...</label>
+                        </div>
+                    </td>
+
+                </tr>
+            </tfoot>
+        </table>
+
+    </div>
+    <div id="divHiddenData">
+
+    </div>
+
+    <script>
+        var arrayWorkingList = [];
+
+        function page_OnLoad() {
+            $("#divPnlSuccess").hide();
+            // Check for and set Default Values.
+            var strLatFields = EZT.Utilities.getEZTSetting("crmAdvFindLatFields");
+            var strLonFields = EZT.Utilities.getEZTSetting("crmAdvFindLonFields");
+            var eztEndpoint = EZT.Utilities.getEZTSetting("EZT Instance URL");
+
+            if (strLatFields == "Forbidden" || strLonFields == "Forbidden" || eztEndpoint == "Forbidden") {
+                $("#divPnlTools").hide();
+                $("#pnlSettings").hide();
+                $("#divPnlMessage").show();
+                $('#lblMessage').text("Current User does not have sufficient security rights to read EasyTerritory Settings.\r\n\r\nPlease contact your administrator and request that Read access be granted to the EasyTerritory Settings entity.");
+            }
+            else {
+                if (strLatFields == "NoSettingReturned") {
+                    setDefaultValue("crmAdvFindLatFields", "new_latitude,new_lat,address1_latitude");
+                }
+
+                if (strLonFields == "NoSettingReturned") {
+                    setDefaultValue("crmAdvFindLonFields", "new_longitude,new_lon,address1_longitude");
+                }
+
+                if (eztEndpoint == "NoSettingReturned") {
+                    setDefaultValue("EZT Instance URL", "http://localserver:8085/APP");
+                }
+
+                // Retrieve the current settings
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet?$select=ezt_easyterritorysettingsId,ezt_Setting,ezt_SettingName,ModifiedOn",
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                    },
+                    async: true,
+                    success: function (data, textStatus, xhr) {
+                        var results = data.d.results;
+                        for (var i = 0; i < results.length; i++) {
+                            var ezt_easyterritorysettingsId = results[i].ezt_easyterritorysettingsId;
+                            var ezt_SettingName = results[i].ezt_SettingName;
+                            var ezt_Setting = results[i].ezt_Setting;
+                            var dtModifiedOn = results[i].ModifiedOn;
+                            addSettingTableRow("divSettings", ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i.toString());
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert(textStatus + " " + errorThrown);
+                    }
+                });
+            }
+
+        }; // end page_OnLoad
+
+        function setDefaultValue(settingName, defaultValue) {
+            var entity = {};
+            entity.ezt_SettingName = settingName;
+            entity.ezt_Setting = defaultValue;
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                datatype: "json",
+                url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet",
+                data: JSON.stringify(entity),
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                },
+                async: false,
+                success: function (data, textStatus, xhr) {
+                    var result = data.d;
+                    var newEntityId = result.ezt_easyterritorysettingsId;
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus + " " + errorThrown);
+                }
+            });
+        };
+
+        function addSettingTableRow(divName, ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i) {
+
+            var tblSettings = document.getElementById("tblTbody");
+
+            var tr = document.createElement('tr');
+
+            var td1 = document.createElement('td');
+            var td2 = document.createElement('td');
+            td1.id = "td1_" + i;
+
+            var text1 = document.createTextNode(ezt_SettingName);
+            text1.nodeName = "txtSetting_" + i;
+
+            var txtInput = document.createElement("input");
+            txtInput.type = "text";
+            txtInput.name = "txtSettingValue_" + i;
+            txtInput.value = ezt_Setting;
+
+            td1.appendChild(text1);
+            td2.appendChild(txtInput);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+
+            tblSettings.appendChild(tr);
+
+            var divHiddenData = document.getElementById("divHiddenData");
+            var hidInput = document.createElement('input');
+            hidInput.type = "hidden";
+            hidInput.value = ezt_easyterritorysettingsId;
+            hidInput.id = "hidden_" + i;
+            hidInput.name = 'guid_' + i;
+            divHiddenData.appendChild(hidInput);
+
+        }
+
+
+        page_OnLoad();
+
+    </script>
+
+</body>
+</html>
