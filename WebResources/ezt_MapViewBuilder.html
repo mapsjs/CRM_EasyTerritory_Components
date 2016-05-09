@@ -1,4 +1,4 @@
-﻿<html>
+<html>
 <head>
     <meta charset="utf-8">
     <title></title>
@@ -225,7 +225,7 @@
                     // Build the REST query
                     var strURL = Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/SavedQuerySet?";
                     var strColumnSet = "$select=FetchXml,Name,QueryType,SavedQueryId,ReturnedTypeCode";
-                    var strFilter = "&$filter=QueryType eq 0";
+                    var strFilter = "&$filter=StateCode/Value eq 0 and QueryType eq 0";
 
                     // Sample of how to do group or in query
                     // ( substringof('address1_latitude',FetchXml) or  substringof('new_latitude',FetchXml))
@@ -260,7 +260,10 @@
                         contentType: "application/json; charset=utf-8",
                         datatype: "json",
                         url: strURL,
-                        beforeSend: function (XMLHttpRequest) { XMLHttpRequest.setRequestHeader("Accept", "application/json"); },
+                        beforeSend: function (XMLHttpRequest) {
+                            XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                            XMLHttpRequest.setRequestHeader("Prefer", "odata.maxpagesize=500");
+                        },
                         async: false,
                         success: function (data, textStatus, xhr) {
                             var results = data.d.results;
@@ -276,7 +279,8 @@
                                     queryId: SavedQueryId.toString(),
                                     entitySDKName: ReturnedTypeCode,
                                     entityFriendlyName: ReturnedTypeCode,
-                                    theFetchXML: FetchXml
+                                    theFetchXML: FetchXml,
+                                    sortField: ReturnedTypeCode + "-" + Name
                                 });
 
                             }
@@ -290,13 +294,17 @@
                     // Note: This should only return views that the current user has rights to see.
                     strURL = Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/UserQuerySet?";
                     strColumnSet = "$select=FetchXml,Name,QueryType,UserQueryId,ReturnedTypeCode";
+                    // strFilter = "&$filter=QueryType eq 0 and StateCode/Value eq 0";
                     strURL = strURL + strColumnSet + strFilter;
                     $.ajax({
                         type: "GET",
                         contentType: "application/json; charset=utf-8",
                         datatype: "json",
                         url: strURL,
-                        beforeSend: function (XMLHttpRequest) { XMLHttpRequest.setRequestHeader("Accept", "application/json"); },
+                        beforeSend: function (XMLHttpRequest) {
+                            XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                            XMLHttpRequest.setRequestHeader("Prefer", "odata.maxpagesize=500");
+                        },
                         async: false,
                         success: function (data, textStatus, xhr) {
                             var results = data.d.results;
@@ -311,7 +319,8 @@
                                     queryId: UserQueryId.toString(),
                                     entitySDKName: ReturnedTypeCode,
                                     entityFriendlyName: ReturnedTypeCode,
-                                    theFetchXML: FetchXml
+                                    theFetchXML: FetchXml,
+                                    sortField: ReturnedTypeCode + "-" + Name
                                 });
 
                             }
@@ -334,10 +343,14 @@
 
                             };
 
+                            debugger;
+
                             // Build the list of checkbox items for the user to select from
                             var buildCheckBoxList = function () {
                                 // Sort the results
-                                arrayWorkingList.sort(EZT.Utilities.sort_by('entityFriendlyName', false, function (a) { return a.toUpperCase() }));
+                                // arrayWorkingList.sort(EZT.Utilities.sort_by('entityFriendlyName', false, function (a) { return a.toUpperCase() }));
+                                arrayWorkingList.sort(EZT.Utilities.sort_by('sortField', false, function (a) { return a.toUpperCase() }));
+
                                 for (var i = 0; i < arrayWorkingList.length; i++) {
                                     var entityFriendlyName = arrayWorkingList[i].entityFriendlyName;
                                     var viewName = arrayWorkingList[i].viewName;
