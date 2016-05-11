@@ -29,7 +29,7 @@
             for (var i = 0; i < listLength; i += 2) {
                 if (cbViews.children[i].children[0].checked) {
                     var strLabelValue = cbViews.children[i].children[0].value;
-                    var strLabel = cbViews.children[i].children[0].label;
+                    var strLabel = cbViews.children[i].innerText.trim();
                     var strArrayValueData = strLabelValue.split('|');
                     var strViewType = strArrayValueData[0];
                     var strViewId = strArrayValueData[1];
@@ -56,7 +56,7 @@
 
                 // call ezt rest service to create a new project
                 var call = $.ajax({
-                    url: eztEndpoint + '/REST/Project',
+                    url: eztEndpoint + '/REST/Project/',
                     type: 'POST',
                     cache: false,
                     contentType: 'application/json; charset=utf-8',
