@@ -252,7 +252,7 @@
                         strFilter = strFilter.substr(0, strFilter.length - 3);
                         strFilter = strFilter + ")"
                     }
-                    strURL = strURL + strColumnSet + strFilter;
+                    strURL = strURL + strColumnSet + strFilter + "&$orderby=Name asc";
 
                     // query 'system' views with any of these columns
                     $.ajax({
@@ -295,7 +295,7 @@
                     strURL = Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/UserQuerySet?";
                     strColumnSet = "$select=FetchXml,Name,QueryType,UserQueryId,ReturnedTypeCode";
                     // strFilter = "&$filter=QueryType eq 0 and StateCode/Value eq 0";
-                    strURL = strURL + strColumnSet + strFilter;
+                    strURL = strURL + strColumnSet + strFilter + "&$orderby=Name asc";
                     $.ajax({
                         type: "GET",
                         contentType: "application/json; charset=utf-8",
