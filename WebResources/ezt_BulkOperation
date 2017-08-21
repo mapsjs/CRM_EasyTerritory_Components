@@ -1,253 +1,329 @@
-<html>
-<head>
+<html><head>
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-<!-- Latest compiled JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<!-- Xrm.Page model -->
- <!--<script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>-->
- 
-<!-- javascript azync library-->
-<script src="../WebResources/ezt_async.js"></script>
+    <!-- Xrm.Page model -->
+    <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
 
-</head>
+    <!-- javascript azync library-->
+    <script src="../WebResources/ezt_async.js"></script>
+
+    <meta>
+   
+<meta><meta><meta><meta></head>
 
 
 <body style="word-wrap: break-word;">
-   
-<p style="margin:10px 0px 0px 10px;"> 
 
-<button onclick="runJob()" class="btn btn-primary btn-lg" id="runJob">Bulk Execute Workflow</button>
-<button onclick="stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
+    <div style="margin:10px 0px 0px 10px;">
 
-</p>
+        <button onclick="runJob()" class="btn btn-primary btn-lg" id="runJob">Bulk Execute Workflow</button>
+        <button onclick="stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
 
-<p style="color:red; margin-left:10px; visibility: hidden;" id="cancel"> </p>
-<p style="margin-left:10px; visibility: hidden;" id="ezt"> </p>     
-<!-- p style="margin-left:10px; visibility: hidden;" id="process">Processing: </p --> 
-<p style="margin-left:10px; visibility: hidden;" id="errors">Log:  </p>
+    </div>
 
-<script>
+    <!-- This is paragraph elements for the output of script -->
+    <p style="color:red; margin-left:10px; visibility: hidden;" id="cancel"> </p>
+    <p style="margin-left:10px; visibility: hidden;" id="ezt"> </p>
+    <!-- p style="margin-left:10px; visibility: hidden;" id="process">Processing: </p -->
+    <p style="margin-left:10px; visibility: hidden;" id="errors">Log: </p>
 
-//Global variables
-var url = ('https://eztdev.crm.dynamics.com/api/data/v8.2/contacts'); //leave for debugging
-var moreRecords = true;
-var cancelClicked = false;
-var blockNumber = 0;
-var blockTotal = 0;
-var completed = 0;
-
-//var workflowId = "623A0244-7A17-43B6-9D69-437EEA2BA31B"; leave for debugging
-var workflowId = ""; 
-var clientUrl = "";
-var entity = "";
-var url = "";
-
-
-function setValuesForJob(){
-
-       try{
-             workflowId = window.parent.Xrm.Page.getAttribute('ezt_workflow').getValue()[0].id;
-             clientUrl = parent.Xrm.Page.context.getClientUrl();               
-             entity = parent.Xrm.Page.getAttribute('ezt_entity').getValue();
-             entity = entity.toLowerCase();
-             url = (clientUrl + '/api/data/v8.2/' + entity);
-             
-       } catch(err){
-            
-              document.getElementById("errors").innerHTML = ("Please provide values into the form fields.");
-              moreRecords = false;
-       }   
-
-}
+    <script>
+        //Global variables
+        //var url = ('https://eztdev.crm.dynamics.com/api/data/v8.2/leads');
+        //var entity = "leads";
+        //var clientUrl = "https://eztdev.crm.dynamics.com/";
+        //var workflowId = "05EC85E2-FBD5-4261-826A-BDB5C8391BCA";
+        var entity = "";
+        var url = "";
+        var clientUrl = "";
+        var workflowId = "";
+        var moreRecords = true;
+        var cancelClicked = false;
+        var blockNumber = 0;
+        var completed = 0;
+        var filledInFields = true;
 
 
-function runJob() {
-                 
-              {document.getElementById("stopJob").style.visibility="visible";}
-              //{document.getElementById("process").style.visibility="visible";}
-              {document.getElementById("errors").style.visibility="visible";} 
-              {document.getElementById("runJob").disabled = true;}
-                  {document.getElementById("ezt").style.visibility="visible";}
 
+        function setValuesForJob() {
+            //this sets the values from the form the user plugs in to variables used in script
+            try {
+                workflowId = window.parent.Xrm.Page.getAttribute('ezt_workflow').getValue()[0].id;
+                clientUrl = parent.Xrm.Page.context.getClientUrl();
+                //entity = parent.Xrm.Page.getAttribute('ezt_entity').getValue();
+                //entity = entity.toLowerCase();
+                //url = (clientUrl + '/api/data/v8.2/' + entity);
+                moreRecords = true;
+                completed = 0;
+                blockNumber = 0;
+                cancelClicked = false;
+                document.getElementById("errors").innerHTML = ("");
+                filledInFields = true;
+
+
+            } catch (err) {
+
+                document.getElementById("errors").innerHTML = ("Please provide valid values into the form fields. <br />");
+                moreRecords = false;
+                filledInFields = false;
+            }
+
+        }
+
+
+        function runJob() {
+
+            // hide, enable elements
+            {
+                document.getElementById("stopJob").style.visibility = "visible";
+            }
+            //{document.getElementById("process").style.visibility="visible";}
+            {
+                document.getElementById("errors").style.visibility = "visible";
+            } {
+                document.getElementById("runJob").disabled = true;
+            } {
+                document.getElementById("ezt").style.visibility = "visible";
+            }
+            document.getElementById("cancel").innerHTML = ("");
+
+            //this sets the variables from the form for runJob()    
             setValuesForJob();
-  
+
+            //this gets the entity name from the 'workflow' api  
+            getEntity();
+
             // This loop is done because we can only get 5,000 records at a time
             async.whilst(
 
                 function() {
+                    //check to see if there are more pages 
+                    if (moreRecords == false && cancelClicked == false && filledInFields == true) {
+                        document.getElementById("cancel").innerHTML = ("Job Complete!"); {
+                            document.getElementById("cancel").style.visibility = "visible";
+                        }
+                    }
+                    if (moreRecords == false) {
+                        {
+                            document.getElementById("runJob").disabled = false;
+                        }
+                    }
                     return moreRecords;
                 },
                 function(doneWithBlock) {
 
-                      
+
                     getBlock(doneWithBlock);
-                        
-                         /*setTimeout(function () {
-                             doneWithBlock()
-                                }, 500000) */
-                    
+
+                    /*setTimeout(function () {
+                        doneWithBlock()
+                           }, 500000) */
+
 
                 },
 
                 function(err) {
-                      if(err){
-                        document.getElementById("errors").innerHTML += ("Error in processing:" + err.message); 
-                         doneWithBlock();
-                      }
+                    if (err) {
+                        document.getElementById("errors").innerHTML += ("Error in processing:" + err.message);
+                        doneWithBlock();
+                    }
                 }
             );
-        
-}
-          
 
-//This gets a block of records from an entity, can only get 5,000 records at a time. 
-   function getBlock(doneWithBlock) {
+            moreRecords = true;
+        }
+
+
+        //This gets a block of records from an entity in CRM. 
+        function getBlock(doneWithBlock) {
 
             var xhttp = new XMLHttpRequest();
             xhttp.open("GET", url, true);
-            xhttp.setRequestHeader("Prefer", "odata.maxpagesize=5");
+            xhttp.setRequestHeader("Prefer", "odata.maxpagesize=1000"); //Specify how many records on each page
             xhttp.setRequestHeader("Prefer", "odata.count");
 
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    
+
+
                     var json = JSON.parse(this.responseText);
-                    
+
                     //var block gets the all the rows in a block
                     var block = json.value;
                     blockNumber = json.value.length;
 
-		     processBlock(block, doneWithBlock);
-			
+
+                    document.getElementById("ezt").innerHTML = ("Retrieving: " + blockNumber + " records");
+
+                    processBlock(block, doneWithBlock);
+
                     // this gets the next page of records link		
                     url = json["@odata.nextLink"];
 
-                    // if no more pages (or blocks) of records, this ends the whilst loop
-                   if(cancelClicked == false){
-                          if(typeof url == 'undefined'){
-                                     moreRecords = false;
-                            }
-                               //moreRecords = (typeof uri != 'undefined');
-                     }
-
-                    //this gets the status for how many blocks are processing
-                    blockTotal += blockNumber;
-                    document.getElementById("ezt").innerHTML = ("Processing: " + blockTotal + " records");
-
-		    doneWithBlock();
+                    //if user clicks cancel job moreRecords is set to false and skips over typeof uri because we don't want more pages, want to be done with loop.
+                    if (cancelClicked == false) {
+                        // if no more pages (or blocks) of records, this ends the whilst loop
+                        if (typeof url == 'undefined') {
+                            moreRecords = false;
+                        }
+                        //moreRecords = (typeof uri != 'undefined');
+                    }
 
                 } else if (this.status == 404 || this.status == 400) {
-                     
-                      document.getElementById("errors").innerHTML += ('Error in requesting records from: ' + entity + ', with the url: ' + url + '<br />');
-                      
-                   }
+                    //this error will occur if an entity that does not exist
+                    document.getElementById("errors").innerHTML += ('Error in requesting records from: ' + entity + ', with the url: ' + url + '<br />'); {
+                        document.getElementById("runJob").disabled = false;
+                    }
+
+
+                }
             }
             xhttp.send();
         };
-				
 
-function processBlock(block, doneWithRow) {
-			   
-     // takes the block and gets the id of each record in block
-     async.eachSeries(block, 
-     function(block, doneWithRow){
+        function processBlock(block, doneWithBlock) {
+            async.eachLimit(block, 5,
+                function(block, doneWithRow) {
 
-        //this takes off the trailing "s" of the entity and formats the variable to get the entity's id in the block
-	var entityid = (entity.slice(0, -1) + "id");					 
-        var entityId = block[entityid];
-          //var entityId = block.contactid;
-                                                                
-        //Keep the below lines for testing my demo instance
-       //var workflowId = "623A0244-7A17-43B6-9D69-437EEA2BA31B";
-       //var clientUrl = 'https://eztdev.crm.dynamics.com';
-         
-       //If we press the cancel button during script it skips the fireWorkflow() and goes to callback()                                                        
-       if(cancelClicked == false){
+                    //If we press the cancel button during script it skips the fireWorkflow() and goes to callback()                                                        
+                    if (cancelClicked) {
+                        doneWithRow('cancelled');
 
-            fireWorkflow(entityId, workflowId, clientUrl, block);
+                    } else {
+                        //this takes off the trailing "s" of the entity and formats the variable to get the entity's id in the block
+                        entityid = (entity.slice(0, -1) + "id");
+                        var entityId = block[entityid];
+                        //var entityId = block.contactid;
 
-        } 
-                                                                
-       doneWithRow();
-					
-							
-   }, function(err) {
-	if(err){
-            document.getElementById("errors").innerHTML += ("Error processing in eachSeries:" + err.message); 
-            doneWithRow();
-         }
-    });
-}
+                        //Keep the below lines for testing my demo instance
+                        //var workflowId = "623A0244-7A17-43B6-9D69-437EEA2BA31B";
+                        //var clientUrl = 'https://eztdev.crm.dynamics.com';
+                        fireWorkflow(entityId, block, doneWithRow);
 
-// this is done to fire workflow for each record
-function fireWorkflow(entityId, workflowId, clientUrl, block) {
-    var functionName = "executeWorkflow";
-    var query = "";
-    try {
+                    }
 
-        //Define the query to execute the action
-        query = "workflows(" + workflowId.replace("}", "").replace("{", "") + ")/Microsoft.Dynamics.CRM.ExecuteWorkflow";
+                },
+                function(err) {
+                    if (err && err != 'cancelled') {
+                        document.getElementById("errors").innerHTML += ("Error processing in eachSeries:" + err);
 
-        var data = {           
-                "EntityId": entityId                         
-        };
+                    }
+                    doneWithBlock();
+                });
 
-        //Create request
-       // request url
-       var completeUrl = clientUrl + "/api/data/v8.2/" + query;
-        var req = new XMLHttpRequest();
-        req.open("POST", completeUrl, true);
-        req.setRequestHeader("Accept", "application/json");
-        req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        req.setRequestHeader("OData-MaxVersion", "4.0");
-        req.setRequestHeader("OData-Version", "4.0");
-
-        req.onreadystatechange = function () {
-
-            if (this.readyState == 4) {
-                req.onreadystatechange = null;
-
-                if (this.status == 200) {
-                    //success callback this returns null since no return value available.
-                    var result = JSON.parse(this.response);
-                     completed++;
-                     
-                     document.getElementById("ezt").innerHTML = ("Completed workflow on " +  completed + " records");
+        }
 
 
-                } else {
-                    //error callback
-                    var error = JSON.parse(this.response).error;
-                     document.getElementById("errors").innerHTML += ('Error for record:  ' + block.name + ';    Error message:  ' + error.message + '<br />');
+        // this is done to fire workflow for each record
+        function fireWorkflow(entityId, block, doneWithRow) {
+
+            var functionName = "executeWorkflow";
+            var query = "";
+            try {
+
+                //Define the query to execute the action
+                query = "workflows(" + workflowId.replace("}", "").replace("{", "") + ")/Microsoft.Dynamics.CRM.ExecuteWorkflow";
+
+                var data = {
+                    "EntityId": entityId
+                };
+
+                //Create request
+                // request url
+                var completeUrl = clientUrl + "/api/data/v8.2/" + query;
+                var req = new XMLHttpRequest();
+                req.open("POST", completeUrl, true);
+                req.setRequestHeader("Accept", "application/json");
+                req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                req.setRequestHeader("OData-MaxVersion", "4.0");
+                req.setRequestHeader("OData-Version", "4.0");
+
+                req.onreadystatechange = function() {
+
+                    if (this.readyState == 4) {
+                        req.onreadystatechange = null;
+
+                        if (this.status == 200) {
+                            //success callback this returns null since no return value available.
+                            var result = JSON.parse(this.response);
+
+                            completed++;
+
+
+                            document.getElementById("ezt").innerHTML = ("Completed workflow on " + completed + " records");
+                            doneWithRow();
+
+                        } else if (this.status == 400 || this.status == 404) {
+                            //error callback
+                            var error = JSON.parse(this.response).error;
+                            document.getElementById("errors").innerHTML += ('Error for record:  ' + block.fullname + ';    Error message:  ' + error.message + '<br />');
+                            doneWithRow();
+                        }
+                    }
+                };
+                req.send(JSON.stringify(data));
+
+            } catch (err) {
+                //throwError(functionName, err);
+                document.getElementById("errors").innerHTML += ("Error in executing: " + functionName + ":  " + err);
+            }
+
+        }
+
+
+        function stopJob() {
+
+            //this function is called if user wants to stop the job
+            moreRecords = false;
+            cancelClicked = true;
+
+            {
+                document.getElementById("cancel").style.visibility = "visible";
+            }
+            document.getElementById("cancel").innerHTML = ("Canceled!");
+
+        }
+
+
+        function getEntity() {
+            //var url = 'https://eztdev.crm.dynamics.com/api/data/v8.2/workflows?$select=name,primaryentity&$filter=workflowid eq (05EC85E2-FBD5-4261-826A-BDB5C8391BCA)';
+
+            var endPoint = workflowId.replace("}", "").replace("{", "");
+
+            url = (clientUrl + '/api/data/v8.2/workflows?$select=name,primaryentity&$filter=workflowid eq (' + endPoint + ')');
+
+            var call = new XMLHttpRequest();
+            call.open("GET", url, false);
+
+            call.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    var json = JSON.parse(this.responseText);
+
+                    entity = json.value[0].primaryentity;
+                    entity = (entity + 's');
+                    var entityid = (entity.slice(0, -1) + "id"); 
+                    
+                    url = (clientUrl + '/api/data/v8.2/' + entity + '/?$select=fullname,' + entityid);
+
+
+                } else if (this.status == 400 || this.status == 404) {
+                    document.getElementById("errors").innerHTML += (this.responseText);
                 }
             }
+            call.send();
         };
-        req.send(JSON.stringify(data));
-
-    } catch (err) {
-        //throwError(functionName, err);
-          document.getElementById("errors").innerHTML += ("Error in executing: " + functionName + ":  " + err.message);
-    }
-}
+    </script>
 
 
-function stopJob() { 
-
-moreRecords = false; 
-cancelClicked = true;
-
-{document.getElementById("cancel").style.visibility="visible";}
-document.getElementById("cancel").innerHTML += ("Canceled!");
-}
-
-</script>
 
 
 
