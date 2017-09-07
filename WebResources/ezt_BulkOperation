@@ -24,8 +24,8 @@
 
     <div style="margin:10px 0px 0px 10px;">
 
-        <button onclick="runJob()" class="btn btn-primary btn-lg" id="runJob">Bulk Execute Workflow</button>
-        <button onclick="stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
+        <button onclick="ezt_runJob()" class="btn btn-primary btn-lg" id="runJob">Bulk Execute Workflow</button>
+        <button onclick="ezt_stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
 
     </div>
 
@@ -36,6 +36,8 @@
     <p style="margin-left:10px; visibility: hidden;" id="errors">Log: </p>
 
     <script>
+    
+    (function() {
         //Global variables
         //var url = ('https://eztdev.crm.dynamics.com/api/data/v8.2/leads');
         //var entity = "leads";
@@ -321,6 +323,11 @@
             }
             call.send();
         };
+        
+        window.ezt_runJob = runJob;
+        window.ezt_stopJob = stopJob;
+        
+        })();
     </script>
 
 
