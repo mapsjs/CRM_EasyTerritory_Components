@@ -1,0 +1,141 @@
+<html><head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- library to parse CSV to JSON -->
+<script src="../WebResources/ezt_papaparse.min.js"></script>
+
+<!-- Xrm.Page model -->
+<script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+
+<!-- javascript azync library-->
+<script src="../WebResources/ezt_async.js"></script>
+
+
+<!--bootstrap-->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style>
+
+
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style></head><body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;">
+
+<button class="btn btn-primary btn-lg" id="EztZipCodePointDataButton"> Click for sample Zip Code Data</button>
+<p id="zipCodeResult"></p>
+
+
+<script>
+
+document.getElementById("EztZipCodePointDataButton").addEventListener("click", getEztZipCodePointData);
+var newRecordCount =0;
+
+function getEztZipCodePointData (){
+
+async.waterfall([
+    getEztZipDataFromEzt,
+	createNewZipRecord
+    
+], function (err, result) {
+    // result now equals 'done'
+
+});
+}
+
+//this makes an ajax call to get EasyTerritory ZIP Code Point Data
+function getEztZipDataFromEzt (callback) {
+{document.getElementById("EztZipCodePointDataButton").disabled = true;}
+var xhttp = new XMLHttpRequest();
+xhttp.onreadystatechange = function() {
+  if (this.readyState == 4 && this.status == 200) {
+    //document.getElementById("zipCodeResult").innerHTML = this.responseText;
+
+	var unParsedCSV = this.responseText;
+	
+        //using papaParse to take the csv and convert each line as an element in the array.
+	var parsedCSV = Papa.parse(unParsedCSV, {header: true, dynamicTyping: true});
+	
+       //.data is papaParse key that holds the parsed csv in the papaParse JSON 
+	var parsedCSVArray = parsedCSV.data;
+        
+	callback(null, parsedCSVArray);
+        
+  }
+};
+
+var zipCodeFileUrl = 'https://downloads.easyterritory.com/latest/ZIP_Code_Points.csv';
+xhttp.open("GET",zipCodeFileUrl, true);
+xhttp.onprogress = function() {
+   if(this.readyState == 1 || this.readyState == 2 || this.readyState == 3) {
+		document.getElementById("zipCodeResult").innerHTML = "Fetching ZIP Data from EasyTerritory... Please wait"
+	}
+}
+
+xhttp.send();
+}
+
+//this creates a new record in the EasyTerritory ZIP Code Data CRM Entity from the parsed zip csv array we are getting from EasyTerritory server
+function createNewZipRecord (parsedCSVArray, callback) {
+                
+		async.eachLimit(parsedCSVArray, 5, function(parsedCSVItem, doneWithRecord) {
+		        //each element in the csv zip array is being iterated over 
+			newRecordApiCall(parsedCSVItem, doneWithRecord);
+			
+		   
+		}, function(err) {    
+			if( err ) {
+			  
+			} else {
+			  console.log('All files have been processed successfully');
+			}
+		});
+
+		callback(null);
+	}
+
+
+//this makes ajax 'post' call to add the element in the array as a new record in the EasyTerritory Zip Code Data entity
+function newRecordApiCall(parsedCSVItem, doneWithRecord) {
+
+var zipCode = parsedCSVItem['ZIP Code'].toString();
+
+//this variable gets the url of crm instance running this script
+var clientURL = parent.Xrm.Page.context.getClientUrl();
+//var clientURL = 'https://eztdev.crm.dynamics.com'
+var req = new XMLHttpRequest()
+req.open("POST",encodeURI(clientURL + "/api/data/v8.1/ezt_easyterritoryzipcodepointdatas"), true);
+req.setRequestHeader("Accept", "application/json");
+req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+req.setRequestHeader("OData-MaxVersion", "4.0");
+req.setRequestHeader("OData-Version", "4.0");
+req.onreadystatechange = function () {
+ if (this.readyState == 4 /* complete */) {
+  req.onreadystatechange = null;
+  if (this.status == 204) {
+   var accountUri = this.getResponseHeader("OData-EntityId");
+   console.log("Created account with URI: "+ clientURL);
+
+   newRecordCount++;
+   document.getElementById("zipCodeResult").innerHTML = 'Created ' + newRecordCount +' new zip records.' 
+   
+   doneWithRecord();
+  }
+  else {
+   var error = JSON.parse(this.response).error;
+   console.log(error.message);
+  }
+ }
+};
+//we are taking the parsed csv item and setting its property to the field value in the crm entity
+req.send(JSON.stringify({ ezt_longitude: parsedCSVItem.Longitude,
+							ezt_latitude: parsedCSVItem.Latitude, 
+							ezt_zipcode: zipCode,
+							ezt_zip3: parsedCSVItem['ZIP 3'],
+							ezt_type: parsedCSVItem.Type,
+							ezt_description: parsedCSVItem.Description,
+							ezt_state: parsedCSVItem.State,
+							ezt_city: parsedCSVItem.City,
+							ezt_uspslookup: parsedCSVItem['USPS Lookup']
+							}));
+}
+</script></body></html>
