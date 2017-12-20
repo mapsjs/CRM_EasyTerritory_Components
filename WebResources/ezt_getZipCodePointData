@@ -1,609 +1,657 @@
 <html><head>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-<!-- library to parse CSV to JSON -->
-<script src="../WebResources/ezt_papaparse.min.js"></script>
+    <!-- library to parse CSV to JSON -->
+    <script src="../WebResources/ezt_papaparse.min.js"></script>
 
-<!-- Xrm.Page model -->
-<script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <!-- Xrm.Page model -->
+    <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
 
-<!-- javascript azync library-->
-<script src="../WebResources/ezt_async.js"></script>
-
-
-<!--bootstrap-->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- javascript azync library-->
+    <script src="../WebResources/ezt_async.js"></script>
 
 
+    <!--bootstrap-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-<!-- library to parse CSV to JSON -->
-<script src="../WebResources/ezt_papaparse.min.js"></script>
+    <!-- library to parse CSV to JSON -->
+    <script src="../WebResources/ezt_papaparse.min.js"></script>
 
-<!-- Xrm.Page model -->
-<script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <!-- Xrm.Page model -->
+    <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
 
-<!-- javascript azync library-->
-<script src="../WebResources/ezt_async.js"></script>
-
-
-<!--bootstrap-->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- javascript azync library-->
+    <script src="../WebResources/ezt_async.js"></script>
 
 
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style>
+    <!--bootstrap-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<meta><style type="text/css">P { margin: 0; }</style></head>
+
+<body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;">
+    
+	<button class="btn btn-primary btn-lg" id="EztZipCodePointDataButton"> Get Latest ZIP Code Data</button>
+    <p id="zipCodeResult"></p>
+    <p id="getZipErrors"></p>
+
+    <p id="freeTrialSection" style="display: none; padding-bottom: 5px">
+
+        <strong>Ready to get started?:</strong> Register for a free trial of EasyTerritory Enterprise by clicking the button below.&nbsp; &nbsp;&nbsp;<br><br>
+        <button class="btn btn-success btn-lg " id="EztFreeTrial" onclick="window.open('http://www.easyterritory.com/register/', '_blank')">Free Trial</button><br><br> EasyTerritory Enterprise features includes:
+        <br> - Manage ZIP Code to territory alignments
+        <br> - Map CRM records
+        <br> - Create mobile maps
+        <br> - Geocode records with Microsoft Bing Maps
+        <br> - Create Marketing Lists
+        <br> - Much More!
 
 
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style></head><body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;">
-
-<button class="btn btn-primary btn-lg" id="EztZipCodePointDataButton"> Get Latest ZIP Code Data</button>
-<p id="zipCodeResult"></p>
-<p id="getZipErrors"></p>
-
-<p>
-<br>
-<br>
-<br>
-<br>
-<br>
-<strong>Ready to get started?:</strong>  Register for a free trial of EasyTerritory Enterprise by clicking the button below.&nbsp; &nbsp;&nbsp;<br><br>
-<button class="btn btn-success btn-lg " id="EztFreeTrial" onclick="window.open('http://www.easyterritory.com/register/', '_blank')">Free Trial</button><br><br>
-EasyTerritory allows organizations to: 
-<br> - Manage ZIP Code to territory alignments
-<br> - Map CRM records
-<br> - Create mobile maps
-<br> - Geocode records with Microsoft Bing Maps
-<br> - Much more
-
-
-</p>
+    </p>
     <script>
-	(function() {
-		document.getElementById("EztZipCodePointDataButton").addEventListener("click", getEztZipCodePointData);
-	
-        var moreCrmPages = true;
-        var entityEndPoint = '/api/data/v8.1/ezt_easyterritoryzipcodepointdatas?$select=ezt_longitude,ezt_zip3,ezt_uspslookup,ezt_latitude,ezt_type,ezt_easyterritoryzipcodepointdataid,ezt_description,ezt_state,ezt_city,ezt_zipcode,ezt_address';
-        var clientUrl = parent.Xrm.Page.context.getClientUrl();
-        var nextPageUrl = clientUrl + entityEndPoint;
-		var zipDataFromEzt = []
-		var insertRecordCount = 0;
-		var updateRecordCount = 0;
-		var deleteRecordCount = 0;
-		var insertRecordCountTotal = 0;
-		var updateRecordCountTotal = 0;
-		var deleteRecordCountTotal = 0;
-		var recordsToDelete = [];
-		var recordsToUpdate = [];
-		var recordsToInsert = [];
-		var whilstCount = 0;
-		var countCrmPages = 1;
-       
+        (function() {
 
-            //checkEntityEzt entry point of program
-        function getEztZipCodePointData() {
+            var moreCrmPages = true;
+            var entityEndPoint = '/api/data/v8.1/ezt_easyterritoryzipcodepointdatas?$select=ezt_longitude,ezt_zip3,ezt_uspslookup,ezt_latitude,ezt_type,ezt_easyterritoryzipcodepointdataid,ezt_description,ezt_state,ezt_city,ezt_zipcode,ezt_address';
+            var clientUrl = parent.Xrm.Page.context.getClientUrl();
+            var nextPageUrl = clientUrl + entityEndPoint;
+            var zipDataFromEzt = []
+            var insertRecordCount = 0;
+            var updateRecordCount = 0;
+            var deleteRecordCount = 0;
+            var insertRecordCountTotal = 0;
+            var updateRecordCountTotal = 0;
+            var deleteRecordCountTotal = 0;
+            var recordsToDelete = [];
+            var recordsToUpdate = [];
+            var recordsToInsert = [];
+            var whilstCount = 0;
+            var countCrmPages = 1;
 
-            async.waterfall([
-				setGlobalVariables,
-                getEztZipDataFromEzt,
-                getEztRecordsFromCrm,
-				insertNewZipRecord,
-	            updateZipRecord,
-				deleteZipRecord
+            document.getElementById("EztZipCodePointDataButton").addEventListener("click", getEztZipCodePointData);
+            window.onload = checkEztSettingsEntityWaterfall;
 
-            ], function(err) {
-                   
-                if (err) {
-                     document.getElementById("getZipErrors").innerHTML += ("Error in processing flow: " + err.message);
-                } else {
-					if(recordsToDelete == 0 && recordsToUpdate == 0 && recordsToInsert == 0)
-					{
-						document.getElementById("zipCodeResult").innerHTML = "ZIP code entity already has the latest data. <br /> No records added or changed."
-					} else {
-					 document.getElementById("zipCodeResult").innerHTML = "Success! Latest data set has been imported. <br /> New zip records created: " + insertRecordCount + "<br /> Zip records updated: " + updateRecordCount + " <br /> Zip records retired: " + deleteRecordCount
-					}
-					 document.getElementById("EztZipCodePointDataButton").disabled = false;	
-				}					 
-            });
-        }
-		
-		function setGlobalVariables(callback){
-					//this is important if a user clicks on the buttom again, refreshes the global variables in the closure.
-			
-			document.getElementById("EztZipCodePointDataButton").disabled = true;
-			moreCrmPages = true;
-			entityEndPoint = '/api/data/v8.1/ezt_easyterritoryzipcodepointdatas?$select=ezt_longitude,ezt_zip3,ezt_uspslookup,ezt_latitude,ezt_type,ezt_easyterritoryzipcodepointdataid,ezt_description,ezt_state,ezt_city,ezt_zipcode,ezt_address';
-			clientUrl = parent.Xrm.Page.context.getClientUrl();
-			nextPageUrl = clientUrl + entityEndPoint;
-			zipDataFromEzt = []
-			insertRecordCount = 0;
-			updateRecordCount = 0;
-			deleteRecordCount = 0;
-			insertRecordCountTotal = 0;
-			updateRecordCountTotal = 0;
-			deleteRecordCountTotal = 0;
-			recordsToDelete = [];
-			recordsToUpdate = [];
-			recordsToInsert = [];
-			whilstCount = 0;
-			countCrmPages = 1;
-			
-			callback(null)
-		}
-             
-			//this function gets records from EZT server and parses it.
-        function getEztZipDataFromEzt(callback) {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    //document.getElementById("zipCodeResult").innerHTML = this.responseText;
+				// when page loads this function is called to check if the customer is on a trial.  If so, show the free trial message.
+            function checkEztSettingsEntityWaterfall() {
+                async.waterfall([
+                    checkEztSettingsEntity
 
-                    var unParsedCSV = this.responseText;
+                ], function(err) {
+                    if (err) {
+                        document.getElementById("getZipErrors").innerHTML += ("Error in CheckEztSettinsEntityWaterfall: " + err.message + "<br />");
+                    }
+                });
+            }
 
-                    //using papaParse to take the csv and convert each line as an element in the array.
-                    var parsedCSV = Papa.parse(unParsedCSV, {
-                        header: true,
-                        dynamicTyping: true,
-						skipEmptyLines: true
+            //entry point of program
+            function getEztZipCodePointData() {
+
+                async.waterfall([
+                    setGlobalVariables,
+                    getEztZipDataFromEzt,
+                    getEztRecordsFromCrm,
+                    insertNewZipRecord,
+                    updateZipRecord,
+                    deleteZipRecord
+
+                ], function(err) {
+
+                    if (err) {
+                        document.getElementById("getZipErrors").innerHTML += ("Error in getEztZipCodePointData Waterfall: " + err.message + "<br />");
+                    } else {
+                        if (recordsToDelete == 0 && recordsToUpdate == 0 && recordsToInsert == 0) {
+                            document.getElementById("zipCodeResult").innerHTML = "ZIP code entity already has the latest data. <br /> No records added or changed."
+                        } else {
+                            document.getElementById("zipCodeResult").innerHTML = "Success! Latest data set has been imported. <br /> New zip records created: " + insertRecordCount + "<br /> Zip records updated: " + updateRecordCount + " <br /> Zip records retired: " + deleteRecordCount
+                        }
+                        document.getElementById("EztZipCodePointDataButton").disabled = false;
+                    }
+                });
+            }
+
+            function setGlobalVariables(callback) {
+                //this is important if a user clicks on the buttom again, refreshes the global variables in the closure.
+
+                document.getElementById("EztZipCodePointDataButton").disabled = true;
+                moreCrmPages = true;
+                entityEndPoint = '/api/data/v8.1/ezt_easyterritoryzipcodepointdatas?$select=ezt_longitude,ezt_zip3,ezt_uspslookup,ezt_latitude,ezt_type,ezt_easyterritoryzipcodepointdataid,ezt_description,ezt_state,ezt_city,ezt_zipcode,ezt_address';
+                clientUrl = parent.Xrm.Page.context.getClientUrl();
+                nextPageUrl = clientUrl + entityEndPoint;
+                zipDataFromEzt = []
+                insertRecordCount = 0;
+                updateRecordCount = 0;
+                deleteRecordCount = 0;
+                insertRecordCountTotal = 0;
+                updateRecordCountTotal = 0;
+                deleteRecordCountTotal = 0;
+                recordsToDelete = [];
+                recordsToUpdate = [];
+                recordsToInsert = [];
+                whilstCount = 0;
+                countCrmPages = 1;
+
+                callback(null)
+            }
+
+				//checks if customer is on a free trial by looking at the ext_settings entity in the ezt_setting field
+            function checkEztSettingsEntity(callback) {
+
+                var xhttp = new XMLHttpRequest();
+                clientUrl = parent.Xrm.Page.context.getClientUrl();
+                var eztSettingsUrl = clientUrl + "/api/data/v8.2/ezt_easyterritorysettingses?$filter=ezt_settingname eq 'EZT Instance URL'";
+                console.log(eztSettingsUrl);
+                xhttp.open("GET", eztSettingsUrl, true);
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                      
+                        var eztSettingsJson = JSON.parse(this.responseText);
+
+                        var eztSettingsValue = eztSettingsJson.value[0].ezt_setting;
+
+                        var hasBrackets = eztSettingsValue.includes("GUID")
+
+                        if (hasBrackets) {
+                            document.getElementById("freeTrialSection").style.display = "block";
+
+                        }
+
+                        callback(null);
+
+                    } else if (this.readyState == 400 || this.readyState == 404) {
+                        console.log("Error in querying the ezt_easyterritorysettings entity");
+                        callback(null);
+                    }
+                };
+
+                xhttp.onprogress = function() {
+                    if (this.readyState == 1 || this.readyState == 2 || this.readyState == 3) {
+
+                    }
+                }
+
+                xhttp.send();
+
+            }
+
+            //this function gets records from EZT server and parses it.
+            function getEztZipDataFromEzt(callback) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        //document.getElementById("zipCodeResult").innerHTML = this.responseText;
+
+                        var unParsedCSV = this.responseText;
+
+                        //using papaParse to take the csv and convert each line as an element in the array.
+                        var parsedCSV = Papa.parse(unParsedCSV, {
+                            header: true,
+                            dynamicTyping: true,
+                            skipEmptyLines: true
+                        });
+
+                        //.data is papaParse key that holds the parsed csv in the papaParse JSON 
+                        zipDataFromEzt = parsedCSV.data;
+
+                        callback(null);
+
+                    } else if (this.readyState == 400 || this.readyState == 404) {
+                        document.getElementById("getZipErrors").innerHTML += ("Error in processing getEztZipDataFromEzt: " + err.message + "<br />");
+                        callback(null);
+                    }
+                };
+
+                var zipCodeFileUrl = 'https://downloads.easyterritory.com/latest/ZIP_Code_Points.csv';
+                xhttp.open("GET", zipCodeFileUrl, true);
+                xhttp.onprogress = function() {
+                    if (this.readyState == 1 || this.readyState == 2 || this.readyState == 3) {
+                        document.getElementById("zipCodeResult").innerHTML = "Fetching ZIP Data from EasyTerritory..."
+                    }
+                }
+
+                xhttp.send();
+            }
+
+
+            //this function loops through all the pages of zip code custom entity, collects all records on each page and puts it into recordsfromCrm global variable
+            function getEztRecordsFromCrm(callback) {
+
+
+                async.whilst(
+                    function() {
+                        return moreCrmPages;
+                    },
+                    function(whilstCallback) {
+
+                        loopThroughEntityPages(whilstCallback);
+
+
+                    },
+                    function(err) {
+						if (err) {
+							document.getElementById("getZipErrors").innerHTML += ("Error in getEztRecordsFromCrm whilst loop: " + err.message + "<br />");
+							callback(null);
+						} else {
+							callback(null);
+						}
+                    }
+
+                );
+
+
+            }
+
+            function loopThroughEntityPages(whilstCallback) {
+
+
+                var call = new XMLHttpRequest()
+                call.open("GET", nextPageUrl, true);
+                call.setRequestHeader("Prefer", "odata.maxpagesize=1000"); //Specify how many records on each page
+                call.setRequestHeader("Prefer", "odata.count");
+                call.onprogress = function() {
+                    if (this.readyState == 1 || this.readyState == 2 || this.readyState == 3) {
+                        document.getElementById("zipCodeResult").innerHTML = "Fetching page " + countCrmPages + " of ZIP data from CRM..."
+                    }
+                }
+
+                call.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+
+                        var zipPointRecords = JSON.parse(this.responseText);
+                        var zipRecordsFromCrm = zipPointRecords.value;
+
+                        compareDataSets(zipRecordsFromCrm, whilstCallback);
+                        whilstCount++;
+                        countCrmPages++;
+
+                        nextPageUrl = zipPointRecords["@odata.nextLink"];
+
+                        if (typeof nextPageUrl == 'undefined') {
+                            moreCrmPages = false;
+                        } 
+                    
+                    } else if (this.readyState == 400 || this.readyState == 404) {
+                        document.getElementById("getZipErrors").innerHTML += ("Error loopThroughEntityPages: " + err.message + "<br />");
+                        whilstCallback();
+                    }
+                };
+
+                call.send();
+            }
+
+
+            function compareDataSets(zipRecordsFromCrm, whilstCallback) {
+
+                document.getElementById("zipCodeResult").innerHTML = "Processing data sets..."
+                
+                    //This first compare is checking what is in zipDataFromEzt that is not in zipRecordsFromCrm.  We are checking zipData which is around 41,000 records to one page of CRM records.  This If checks to see if it is the first CRM page.  If so you filter the zipDataFromEzt array.  If not on second page then filter on the recordsToInsert variable.
+					
+				if (whilstCount == 0) {
+
+                    var pageRecordsToInsert = zipDataFromEzt.filter(function(row) {
+
+                        var old = zipRecordsFromCrm.find(function(row2) {
+
+                            return row2.ezt_zipcode == row['ZIP Code'];
+
+                        });
+							//we are returning whatever is not found in zipDataFromEzt
+                        return old == undefined;
+
                     });
 
-                    //.data is papaParse key that holds the parsed csv in the papaParse JSON 
-                    zipDataFromEzt = parsedCSV.data;
+                    pageRecordsToInsert.forEach(function(row) {
+                        recordsToInsert.push(row);
 
-                    callback(null);
+                    });
+
+
+                } else {
+
+                    var pageRecordsToInsert = recordsToInsert.filter(function(row) {
+
+                        var old = zipRecordsFromCrm.find(function(row2) {
+
+                            return row2.ezt_zipcode == row['ZIP Code'];
+
+                        });
+							//we are returing everything that is not found in recordsToInsert
+                        return old == undefined;
+
+                    });
+						//we clear this variable everytime so that in the forEach loop you have a empty array to put the new records in and then when you compare the next CRM page you will compare it against recordsToInsert and not the zipDataFromEzt array.
+					recordsToInsert = [];
+                    pageRecordsToInsert.forEach(function(row) {
+                        recordsToInsert.push(row);
+
+                    });
+
 
                 }
-            };
 
-            var zipCodeFileUrl = 'https://downloads.easyterritory.com/latest/ZIP_Code_Points.csv';
-            xhttp.open("GET", zipCodeFileUrl, true);
-            xhttp.onprogress = function() {
-                if (this.readyState == 1 || this.readyState == 2 || this.readyState == 3) {
-                    document.getElementById("zipCodeResult").innerHTML = "Fetching ZIP Data from EasyTerritory..."
+
+
+                //This goes through and trys to find the records in CRM that are NOT in the EZT data set.  The return array will be deleted
+                var pageRecordsToDelete = zipRecordsFromCrm.filter(function(row) {
+
+
+                    var old = zipDataFromEzt.find(function(row2) {
+
+
+                        return row2['ZIP Code'] == row.ezt_zipcode;
+
+                    });
+
+                    return old == undefined;
+
+                });
+
+                pageRecordsToDelete.forEach(function(row) {
+                    recordsToDelete.push(row);
+
+                });               
+
+                zipRecordsFromCrm.forEach(function(zip) {
+
+                    Object.keys(zip).forEach(function(key) {
+                        if (zip[key] == null) {
+                            zip[key] = "";
+                        }
+                    });
+
+                });
+
+                //this goes through and find the records from both Data sets that are exactly the same and we need to skip over these when updating.
+                var pageRecordsToUpdate = zipDataFromEzt.filter(function(row) {
+
+                    return zipRecordsFromCrm.find(function(row2) {
+
+
+                        //this creates a new property on zipDataFromEZT array because we need the record ID to update it in the ajax call
+                        if (row['ZIP Code'] == row2.ezt_zipcode) {
+                            row.ezt_easyterritoryzipcodepointdataid = row2.ezt_easyterritoryzipcodepointdataid
+
+                        }
+                        return row['ZIP Code'] == row2.ezt_zipcode && (row.Description != row2.ezt_description ||
+                            row.Latitude != row2.ezt_latitude ||
+                            row.Longitude != row2.ezt_longitude ||
+                            row.State != row2.ezt_state ||
+                            row.Type != row2.ezt_type ||
+                            row['USPS Lookup'] != row2.ezt_uspslookup ||
+                            row['ZIP 3'] != row2.ezt_zip3 ||
+                            row.City != row2.ezt_city ||
+                            row.Address != row2.ezt_address
+                        );
+
+
+
+                    });
+
+                });
+
+                pageRecordsToUpdate.forEach(function(row) {
+                    recordsToUpdate.push(row);
+
+                });
+
+                //console.log(recordsToInsert);
+                //console.log(recordsToDelete);
+                //console.log(recordsToUpdate);
+               
+                setTimeout(function() {
+                    whilstCallback();
+                }, 1000);
+
+
+            }
+
+            //this creates a new record in the EasyTerritory ZIP Code Data CRM Entity from the parsed zip csv array we are getting from EasyTerritory server
+            function insertNewZipRecord(callback) {
+                if (recordsToInsert.length > 0) {
+                    insertRecordCountTotal = recordsToInsert.length;
+
+                    async.eachLimit(recordsToInsert, 5, function(insertRecord, doneWithRecord) {
+
+                        //each element in the csv zip array is being iterated over 					
+                        ajaxCallToInsertRecord(insertRecord, doneWithRecord);
+
+
+                    }, function(err) {
+                        if (err) {
+                            document.getElementById("getZipErrors").innerHTML += ("Error in insertNewZipRecord: " + err.message + "<br/>");
+							callback(null);
+                        } else {
+                            console.log('All files have been processed successfully');
+                            document.getElementById("zipCodeResult").innerHTML = ("ZIP records have been created successfully");
+                            callback(null);
+                        }
+                    });
+                } else {
+                    callback(null);
+                }
+
+            }
+
+
+
+
+            function ajaxCallToInsertRecord(insertRecord, doneWithRecord) {
+
+
+
+                var zipCode = insertRecord['ZIP Code'].toString();
+
+                var req = new XMLHttpRequest()
+                req.open("POST", encodeURI(clientUrl + "/api/data/v8.1/ezt_easyterritoryzipcodepointdatas"), true);
+                req.setRequestHeader("Accept", "application/json");
+                req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                req.setRequestHeader("OData-MaxVersion", "4.0");
+                req.setRequestHeader("OData-Version", "4.0");
+                req.onreadystatechange = function() {
+                    if (this.readyState == 4 /* complete */ ) {
+                        req.onreadystatechange = null;
+                        if (this.status == 204) {
+                            var accountUri = this.getResponseHeader("OData-EntityId");
+                            console.log("Created account with URI: " + clientUrl);
+
+                            insertRecordCount++;
+                            document.getElementById("zipCodeResult").innerHTML = 'Created ' + insertRecordCount + ' of  ' + insertRecordCountTotal + ' new zip records.'
+
+                            doneWithRecord();
+                        } else {
+                            var error = JSON.parse(this.response).error;
+                            console.log(error.message);
+                            document.getElementById("getZipErrors").innerHTML += ("Error in creating: " + error.message + "<br />");
+							doneWithRecord();
+                        }
+                    }
+                };
+                //we are taking the parsed csv item and setting its property to the field value in the crm entity
+                req.send(JSON.stringify({
+                    ezt_longitude: insertRecord.Longitude,
+                    ezt_latitude: insertRecord.Latitude,
+                    ezt_zipcode: zipCode,
+                    ezt_zip3: insertRecord['ZIP 3'],
+                    ezt_type: insertRecord.Type,
+                    ezt_description: insertRecord.Description,
+                    ezt_state: insertRecord.State,
+                    ezt_city: insertRecord.City,
+                    ezt_uspslookup: insertRecord['USPS Lookup'],
+                    ezt_address: insertRecord.Address
+                }));
+
+
+            }
+
+
+            function updateZipRecord(callback) {
+                if (recordsToUpdate.length > 0) {
+
+                    updateRecordCountTotal = recordsToUpdate.length;
+
+                    async.eachLimit(recordsToUpdate, 5, function(updateRecord, doneWithRecord) {
+
+                        //each element in the csv zip array is being iterated over 					
+                        ajaxCallToUpdateRecord(updateRecord, doneWithRecord);
+
+
+                    }, function(err) {
+                        if (err) {
+                            document.getElementById("getZipErrors").innerHTML += ("Error in updateZipRecord EachLimit: " + err.message + "<br/>");
+							callback(null);
+                        } else {
+                            console.log('All files have been processed successfully');
+                            document.getElementById("zipCodeResult").innerHTML = ("ZIP records have been created successfully");
+                            callback(null);
+                        }
+                    });
+                } else {
+
+                    callback(null);
+                }
+
+            }
+
+
+            function ajaxCallToUpdateRecord(updateRecord, doneWithRecord) {
+
+                var zipCode = updateRecord['ZIP Code'].toString();
+
+
+
+                var req = new XMLHttpRequest()
+
+                req.open("PATCH", encodeURI(clientUrl + "/api/data/v8.1/ezt_easyterritoryzipcodepointdatas(" + updateRecord.ezt_easyterritoryzipcodepointdataid + ")"), true);
+
+                req.setRequestHeader("Accept", "application/json");
+
+                req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+
+                req.setRequestHeader("OData-MaxVersion", "4.0");
+
+                req.setRequestHeader("OData-Version", "4.0");
+
+                req.onreadystatechange = function() {
+                    if (this.readyState == 4 /* complete */ ) {
+                        req.onreadystatechange = null;
+
+                        if (this.status == 204) {
+                            var accountUri = this.getResponseHeader("OData-EntityId");
+                            console.log("Updated account with URI: " + clientUrl);
+
+                            updateRecordCount++;
+                            document.getElementById("zipCodeResult").innerHTML = 'Updated ' + updateRecordCount + ' of ' + updateRecordCountTotal + ' zip records.'
+
+                            doneWithRecord();
+                        } else {
+                            var error = JSON.parse(this.response).error;
+                            console.log(error.message);
+                            document.getElementById("getZipErrors").innerHTML += ("Error in ajaxCallToUpdateRecord: " + error.message + "<br />");
+							doneWithRecord();
+                        }
+                    }
+                };
+
+                req.send(JSON.stringify({
+                    ezt_longitude: updateRecord.Longitude,
+                    ezt_latitude: updateRecord.Latitude,
+                    ezt_zipcode: zipCode,
+                    ezt_zip3: updateRecord['ZIP 3'],
+                    ezt_type: updateRecord.Type,
+                    ezt_description: updateRecord.Description,
+                    ezt_state: updateRecord.State,
+                    ezt_city: updateRecord.City,
+                    ezt_uspslookup: updateRecord['USPS Lookup'],
+                    ezt_address: updateRecord.Address
+
+                }));
+
+
+
+            }
+
+            function deleteZipRecord(callback) {
+                if (recordsToDelete.length > 0) {
+
+                    deleteRecordCountTotal = recordsToDelete.length;
+
+                    async.eachLimit(recordsToDelete, 5, function(deleteRecord, doneWithRecord) {
+
+                        //each element in the csv zip array is being iterated over 					
+                        ajaxCallToDeleteRecord(deleteRecord, doneWithRecord);
+
+
+                    }, function(err) {
+                        if (err) {
+                            document.getElementById("getZipErrors").innerHTML += ("Error in deleteZipRecord: " + err.message + "<br />");
+							callback(null);
+                        } else {
+                            console.log('All files have been processed successfully');
+                            document.getElementById("zipCodeResult").innerHTML = ("ZIP records have been created successfully");
+                            callback(null);
+                        }
+                    });
+
+
+                } else {
+                    callback(null);
                 }
             }
 
-            xhttp.send();
-        }
+            function ajaxCallToDeleteRecord(deleteRecord, doneWithRecord) {
 
 
-             //this function loops through all the pages of zip code custom entity, collects all records on each page and puts it into recordsfromCrm global variable
-        function getEztRecordsFromCrm(callback) {
-			
-			
-            async.whilst(
-                function() {
-                    return moreCrmPages;
-                },
-                function(whilstCallback) {
+                var req = new XMLHttpRequest()
 
-                    loopThroughEntityPages(whilstCallback);
-					
-					
-                },
-                function(err, n) {
-                    callback(null);
-                }								
-				
-            );
+                req.open("DELETE", encodeURI(clientUrl + "/api/data/v8.1/ezt_easyterritoryzipcodepointdatas(" + deleteRecord.ezt_easyterritoryzipcodepointdataid + ")"), true);
 
-            
-        }
+                req.setRequestHeader("Accept", "application/json");
 
-        function loopThroughEntityPages(whilstCallback) {
-			
+                req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
 
-            var call = new XMLHttpRequest()
-            call.open("GET", nextPageUrl, true);
-            call.setRequestHeader("Prefer", "odata.maxpagesize=2500"); //Specify how many records on each page
-            call.setRequestHeader("Prefer", "odata.count");
-            call.onprogress = function() {
-                if (this.readyState == 1 || this.readyState == 2 || this.readyState == 3) {
-                    document.getElementById("zipCodeResult").innerHTML = "Fetching page " + countCrmPages + " of ZIP data from CRM..."
-                }
-           }
+                req.setRequestHeader("OData-MaxVersion", "4.0");
 
-            call.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
+                req.setRequestHeader("OData-Version", "4.0");
 
-                    var zipPointRecords = JSON.parse(this.responseText);
-                    var zipRecordsFromCrm = zipPointRecords.value;
-					
-					compareDataSets(zipRecordsFromCrm, whilstCallback);
-					whilstCount++;
-					countCrmPages++;
-					
-                    nextPageUrl = zipPointRecords["@odata.nextLink"];
+                req.onreadystatechange = function() {
+                    if (this.readyState == 4 /* complete */ ) {
+                        req.onreadystatechange = null;
 
-                    if (typeof nextPageUrl == 'undefined') {
-                        moreCrmPages = false;
+                        if (this.status == 204) {
+                            var accountUri = this.getResponseHeader("OData-EntityId");
+                            console.log("Updated account with URI: " + clientUrl);
+
+                            deleteRecordCount++;
+                            document.getElementById("zipCodeResult").innerHTML = 'Deleted ' + deleteRecordCount + ' of ' + deleteRecordCountTotal + ' retired zip records.'
+
+                            doneWithRecord();
+                        } else {
+                            var error = JSON.parse(this.response).error;
+                            console.log(error.message);
+                            document.getElementById("getZipErrors").innerHTML += ("Error in ajaxCallToDeleteRecord: " + error.message + "<br />");
+							doneWithRecord();
+						}
                     }
-
-					//pushRecordstoVariable (zipRecordsfromCrm, whilstCallback);
-                   		
-
                 }
-            };
 
-            call.send();
-        }
-				   	
-		
-		function compareDataSets(zipRecordsFromCrm, whilstCallback) {
-			
-				document.getElementById("zipCodeResult").innerHTML = "Processing data sets..."
-				//this goes through and trys to find the records from zipDataFromEzt that don't have a matching ZIP in allZipRecordsFromCrm.  The array that is returned needs to be created in CRM 
-				
-				 
-				if(whilstCount == 0) { 
-					
-					var	pageRecordsToInsert = zipDataFromEzt.filter(function(row) {
+                req.send();
 
-								var old = zipRecordsFromCrm.find(function(row2){
-							
-									return row2.ezt_zipcode == row['ZIP Code']; 
-						
-								});
-								
-								return old == undefined;
-									
-						});	
-						
-						 pageRecordsToInsert.forEach(function(row){
-									recordsToInsert.push(row);
-						
-						});
-							
-						
-				} else {					
-						
-						var pageRecordsToInsert = recordsToInsert.filter(function(row) {
-							
-								var old = zipRecordsFromCrm.find(function(row2){
-							
-									return row2.ezt_zipcode == row['ZIP Code']; 
-						
-								});
-					
-								return old == undefined;
-									
-						});													
-							recordsToInsert = [];
-					 pageRecordsToInsert.forEach(function(row){
-									recordsToInsert.push(row);
-						
-						});
-							
-					
-				}
-				
-				
-				
-				//This goes through and trys to find the records in CRM that are NOT in the EZT data set.  The return array will be deleted
-				var pageRecordsToDelete = zipRecordsFromCrm.filter(function(row) {
-						
-						
-						var old = zipDataFromEzt.find(function(row2){
-					        
-							
-							return row2['ZIP Code'] == row.ezt_zipcode; 
-				
-						});
-			
-						return old == undefined;	
-			
-				});
-		
-		        pageRecordsToDelete.forEach(function(row){
-									recordsToDelete.push(row);
-						
-						});
-						
-				
-				/*zipRecordsFromCrm.forEach(function(x){
-						if(x.ezt_city == null){
-							x.ezt_city= "";
-						} 
-				});*/
-				
-				zipRecordsFromCrm.forEach(function(zip){ 
 
-					Object.keys(zip).forEach(function(key){
-						if(zip[key] == null) {
-							zip[key]= "";
-						}
-					});
 
-				});
-				
-						//this goes through and find the records from both Data sets that are exactly the same and we need to skip over these when updating.
-						var pageRecordsToUpdate = zipDataFromEzt.filter(function(row) {
+            }
 
-							return zipRecordsFromCrm.find(function(row2){
-									
-									
-										//this creates a new property on zipDataFromEZT array because we need the record ID to update it in the ajax call
-									if (row['ZIP Code'] == row2.ezt_zipcode) {
-										row.ezt_easyterritoryzipcodepointdataid = row2.ezt_easyterritoryzipcodepointdataid
-										
-									}
-									return 	row['ZIP Code'] == row2.ezt_zipcode && (row.Description != row2.ezt_description
-																					|| row.Latitude != row2.ezt_latitude
-																					|| row.Longitude != row2.ezt_longitude
-																					|| row.State != row2.ezt_state
-																					|| row.Type != row2.ezt_type
-																					|| row['USPS Lookup'] != row2.ezt_uspslookup
-																					|| row['ZIP 3'] != row2.ezt_zip3
-																					|| row.City != row2.ezt_city
-																					|| row.Address != row2.ezt_address																					
-																					); 
-									
-									  
-						
-									});
+        })();
+    </script>
 
-							});
-				
-						pageRecordsToUpdate.forEach(function(row){
-									recordsToUpdate.push(row);
-						
-						});
-					
-				
-			                 
-					console.log(recordsToInsert);
-					console.log(recordsToDelete);
-					console.log(recordsToUpdate);
-					
-					//console.log('global variable in comparaData Sets function: ' + allZipRecordsFromCrm);
-					setTimeout(function() {
-            whilstCallback();
-        }, 1000);
-					
-					
-		}
-		
-		//this creates a new record in the EasyTerritory ZIP Code Data CRM Entity from the parsed zip csv array we are getting from EasyTerritory server
-		function insertNewZipRecord (callback) {
-                if(recordsToInsert.length > 0) {             
-						insertRecordCountTotal= recordsToInsert.length;
 
-						async.eachLimit(recordsToInsert, 5, function(insertRecord, doneWithRecord) {
-								
-								//each element in the csv zip array is being iterated over 					
-							ajaxCallToInsertRecord(insertRecord, doneWithRecord);
-							
-						   
-						}, function(err) {    
-							if( err ) {
-								document.getElementById("getZipErrors").innerHTML += ("Error in processing: " + err.message);
-							} else {
-							  console.log('All files have been processed successfully');
-										   document.getElementById("zipCodeResult").innerHTML = ("ZIP records have been created successfully");
-							  callback(null);		   
-							}
-						});
-				} else{
-					callback();
-				}
-				
-			}
 
-				
-		
-		
-		function ajaxCallToInsertRecord (insertRecord, doneWithRecord) {
-			
-			
-
-			var zipCode = insertRecord['ZIP Code'].toString();
-
-			var req = new XMLHttpRequest()
-			req.open("POST",encodeURI(clientUrl + "/api/data/v8.1/ezt_easyterritoryzipcodepointdatas" ), true);
-			req.setRequestHeader("Accept", "application/json");
-			req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-			req.setRequestHeader("OData-MaxVersion", "4.0");
-			req.setRequestHeader("OData-Version", "4.0");
-			req.onreadystatechange = function () {
-			 if (this.readyState == 4 /* complete */) {
-			  req.onreadystatechange = null;
-			  if (this.status == 204) {
-			   var accountUri = this.getResponseHeader("OData-EntityId");
-			   console.log("Created account with URI: "+ clientUrl);
-
-			   insertRecordCount++;
-			   document.getElementById("zipCodeResult").innerHTML = 'Created ' + insertRecordCount +' of  ' + insertRecordCountTotal + ' new zip records.' 
-			   
-			   doneWithRecord();
-			  }
-			  else {
-			   var error = JSON.parse(this.response).error;
-			   console.log(error.message);
-				document.getElementById("getZipErrors").innerHTML += ("Error in creating: " + error);
-			  }
-			 }
-			};
-			//we are taking the parsed csv item and setting its property to the field value in the crm entity
-			req.send(JSON.stringify({ ezt_longitude: insertRecord.Longitude,
-										ezt_latitude: insertRecord.Latitude, 
-										ezt_zipcode: zipCode,
-										ezt_zip3: insertRecord['ZIP 3'],
-										ezt_type: insertRecord.Type,
-										ezt_description: insertRecord.Description,
-										ezt_state: insertRecord.State,
-										ezt_city: insertRecord.City,
-										ezt_uspslookup: insertRecord['USPS Lookup'],
-										ezt_address: insertRecord.Address
-										}));
-
-			
-		}
-		
-		
-		function updateZipRecord (callback) {
-			if(recordsToUpdate.length > 0) { 
-			
-				updateRecordCountTotal = recordsToUpdate.length;
-                
-				async.eachLimit(recordsToUpdate, 5, function(updateRecord, doneWithRecord) {
-						
-						//each element in the csv zip array is being iterated over 					
-					ajaxCallToUpdateRecord(updateRecord, doneWithRecord);
-					
-				   
-				}, function(err) {    
-					if( err ) {
-						document.getElementById("getZipErrors").innerHTML += ("Error in processing: " + err.message);
-					} else {
-					  console.log('All files have been processed successfully');
-								   document.getElementById("zipCodeResult").innerHTML = ("ZIP records have been created successfully");
-					  callback(null);		   
-					}
-				});
-			} else {
-				
-				callback();
-			}
-				
-			}
-			
-			
-		function ajaxCallToUpdateRecord(updateRecord, doneWithRecord){
-			
-				var zipCode = updateRecord['ZIP Code'].toString();
-				
-				
-			
-				var req = new XMLHttpRequest()
-
-				req.open("PATCH", encodeURI(clientUrl + "/api/data/v8.1/ezt_easyterritoryzipcodepointdatas(" + updateRecord.ezt_easyterritoryzipcodepointdataid + ")"), true);
-
-				req.setRequestHeader("Accept", "application/json");
-
-				req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-
-				req.setRequestHeader("OData-MaxVersion", "4.0");
-
-				req.setRequestHeader("OData-Version", "4.0");
-				
-				req.onreadystatechange = function () {
-					if (this.readyState == 4 /* complete */) {
-						req.onreadystatechange = null;
-						
-						if (this.status == 204) {
-							var accountUri = this.getResponseHeader("OData-EntityId");
-							console.log("Updated account with URI: " + clientUrl);
-
-							updateRecordCount++;
-							document.getElementById("zipCodeResult").innerHTML = 'Updated ' + updateRecordCount +' of ' + updateRecordCountTotal +' zip records.' 
-						   
-							doneWithRecord();
-						}
-						else {
-							var error = JSON.parse(this.response).error;
-							console.log(error.message);
-							document.getElementById("getZipErrors").innerHTML += ("Error in updating entity: " + error);
-						}
-					}
-				};
-
-				req.send(JSON.stringify({
-								 ezt_longitude: updateRecord.Longitude,
-										ezt_latitude: updateRecord.Latitude, 
-										ezt_zipcode: zipCode,
-										ezt_zip3: updateRecord['ZIP 3'],
-										ezt_type: updateRecord.Type,
-										ezt_description: updateRecord.Description,
-										ezt_state: updateRecord.State,
-										ezt_city: updateRecord.City,
-										ezt_uspslookup: updateRecord['USPS Lookup'],
-										ezt_address: updateRecord.Address
-
-				}));
-
-				
-
-		}
-
-		function deleteZipRecord(callback) {
-			if(recordsToDelete.length > 0) { 
-			
-				deleteRecordCountTotal = recordsToDelete.length;
-                
-				async.eachLimit(recordsToDelete, 5, function(deleteRecord, doneWithRecord) {
-						
-						//each element in the csv zip array is being iterated over 					
-					ajaxCallToDeleteRecord(deleteRecord, doneWithRecord);
-					
-				   
-				}, function(err) {    
-					if( err ) {
-						document.getElementById("getZipErrors").innerHTML += ("Error in processing: " + err.message);
-					} else {
-					  console.log('All files have been processed successfully');
-								   document.getElementById("zipCodeResult").innerHTML = ("ZIP records have been created successfully");
-					  callback(null);		   
-					}
-				});
-	
-				
-			} else {
-				callback();
-			}
-		}
-		
-		function ajaxCallToDeleteRecord(deleteRecord, doneWithRecord) {
-			
-				
-				var req = new XMLHttpRequest()
-
-				req.open("DELETE", encodeURI(clientUrl + "/api/data/v8.1/ezt_easyterritoryzipcodepointdatas(" + deleteRecord.ezt_easyterritoryzipcodepointdataid + ")"), true);
-
-				req.setRequestHeader("Accept", "application/json");
-
-				req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-
-				req.setRequestHeader("OData-MaxVersion", "4.0");
-
-				req.setRequestHeader("OData-Version", "4.0");
-				
-				req.onreadystatechange = function () {
-					if (this.readyState == 4 /* complete */) {
-						req.onreadystatechange = null;
-						
-						if (this.status == 204) {
-							var accountUri = this.getResponseHeader("OData-EntityId");
-							console.log("Updated account with URI: " + clientUrl);
-
-							deleteRecordCount++;
-							document.getElementById("zipCodeResult").innerHTML = 'Deleted ' + deleteRecordCount +' of ' + deleteRecordCountTotal + ' retired zip records.' 
-						   
-							doneWithRecord();
-						}
-						else {
-							var error = JSON.parse(this.response).error;
-							console.log(error.message);
-							document.getElementById("getZipErrors").innerHTML += ("Error in deleting records from entity: " + error);
-						}
-					}
-				}
-				
-				req.send();
-			
-			
-			
-		}	
-			
-	})();		
-			
-			
-		
-    </script></body></html>
+</body></html>
