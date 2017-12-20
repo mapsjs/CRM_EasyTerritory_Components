@@ -1,9 +1,15 @@
-﻿<html>
-<head>
+﻿<html><head>
     <meta charset="utf-8">
 
     <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
     <script src="../../WebResources/ezt_Utilities.js"></script>
+    <!--bootstrap-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- javascript azync library-->
+    <script src="../WebResources/ezt_async.js"></script>
+
     <script>
         function btnUpdateSettings_OnClick() {
             var tblTbody = document.getElementById("tblTbody");
@@ -27,13 +33,13 @@
             if (settingsUpdated) {
                 $("#divPnlSuccess").show();
                 $('#lblUpdateMessage').text("Settings Updated...");
-            }
-
-            else {
+            } else {
                 $("#divPnlSuccess").show();
                 $('#lblUpdateMessage').text("No changes to send...");
             }
-            setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
+            setTimeout(function() {
+                $("#divPnlSuccess").hide();
+            }, 5000);
         }
 
         function btnAssignRoles_OnClick() {
@@ -44,11 +50,11 @@
                 contentType: "application/json; charset=utf-8",
                 datatype: "json",
                 url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/RoleSet?$select=Name,RoleId&$top=1",
-                beforeSend: function (XMLHttpRequest) {
+                beforeSend: function(XMLHttpRequest) {
                     XMLHttpRequest.setRequestHeader("Accept", "application/json");
                 },
                 async: false,
-                success: function (data, textStatus, xhr) {
+                success: function(data, textStatus, xhr) {
                     var results = data.d.results;
                     if (results.length == 1) {
                         for (var i = 0; i < results.length; i++) {
@@ -60,7 +66,7 @@
                     }
 
                 },
-                error: function (xhr, textStatus, errorThrown) {
+                error: function(xhr, textStatus, errorThrown) {
                     alert(textStatus + " " + errorThrown);
                 }
             });
@@ -70,11 +76,11 @@
                 contentType: "application/json; charset=utf-8",
                 datatype: "json",
                 url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/SystemUserSet?$select=FullName,IsIntegrationUser,IsLicensed,SystemUserId&$filter=IsLicensed eq true and IsIntegrationUser eq false",
-                beforeSend: function (XMLHttpRequest) {
+                beforeSend: function(XMLHttpRequest) {
                     XMLHttpRequest.setRequestHeader("Accept", "application/json");
                 },
                 async: false,
-                success: function (data, textStatus, xhr) {
+                success: function(data, textStatus, xhr) {
                     var results = data.d.results;
                     for (var i = 0; i < results.length; i++) {
                         var FullName = results[i].FullName;
@@ -87,7 +93,7 @@
 
                     }
                 },
-                error: function (xhr, textStatus, errorThrown) {
+                error: function(xhr, textStatus, errorThrown) {
                     alert(textStatus + " " + errorThrown);
                 }
             });
@@ -117,17 +123,14 @@
             if (settingsUpdated) {
                 $("#divPnlUsersSuccess").show();
                 $('#lblUpdateUsersMessage').text("Users Updated...");
-            }
-
-            else {
+            } else {
                 $("#divPnlUsersSuccess").show();
                 $('#lblUpdateUsersMessage').text("No changes to send...");
             }
-            setTimeout(function () { $("#divPnlSuccess").hide(); }, 5000);
+            setTimeout(function() {
+                $("#divPnlSuccess").hide();
+            }, 5000);
         }
-
-
-
     </script>
     <style>
         body {
@@ -141,7 +144,9 @@
             float: right;
         }
 
-        spaced-2x, .spaced-v-2x, .spaced-top-2x {
+        spaced-2x,
+        .spaced-v-2x,
+        .spaced-top-2x {
             margin-top: 16px;
         }
 
@@ -186,7 +191,7 @@
 
         .alert-danger {
             color: black;
-            background-color: yellow;
+            background-color: gray;
         }
 
         .alert-success {
@@ -207,7 +212,7 @@
         }
 
         .settingRowHeader {
-            background-color: yellow;
+            background-color: white;
         }
 
         .settingRow {
@@ -224,26 +229,108 @@
         }
     </style>
 
-</head>
-<body>
-    <div id="divPnlMessage" hidden="hidden" class="alert alert-danger">
+    <meta>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+    <meta>
+    <style type="text/css">
+        P {
+            margin: 0;
+        }
+    </style>
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style></head>
+
+<body style="word-wrap: break-word;" onfocusout="parent.setEmailRange();">
+    <div id="divPnlMessage" hidden="hidden" class="alert alert-danger" style="font-family: undefined;">
         <label id="lblMessage" style="font-size:16pt;">...</label>
     </div>
-    <div id="divPnlTools">
+    <div id="divPnlTools" style="font-family: undefined;">
         <table class="toolbar">
-            <tr>
-                <td>
-                    <a href="../../WebResources/ezt_MapViewBuilder"><img src="../../WebResources/ezt_Map_Icon_16_16" /></a>&nbsp;<a href="../../WebResources/ezt_MapViewBuilder">Map View Builder</a>
-                </td>
-            </tr>
+            <tbody>
+                <tr>
+                    <td>
+                        <a href="../../webresources/ezt_mapviewbuilder"><img src="../../webresources/ezt_map_icon_16_16"></a>&nbsp;<a href="../../webresources/ezt_mapviewbuilder">Map View Builder</a>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
-    <div id="pnlSettings">
+    <div id="pnlSettings" style="font-family: undefined;">
         <table id="tblSettings">
             <thead>
                 <tr style="background-color:white;">
                     <td colspan="2">
-                        <img src="../../WebResources/EZT_logo_256x55.png" />
+                        <img src="../../webresources/ezt_logo_256x55.png">
                         <button id="btnUpdateSettings" type="button" class="btn align-right" onclick="btnUpdateSettings_OnClick()">
                             Update Settings
                         </button>
@@ -273,8 +360,22 @@
         </table>
 
     </div>
-    <div id="divHiddenData">
+    <div id="divHiddenData" style="font-family: undefined;">
 
+    </div>
+
+    <div id="freeTrialSection" style="display: none; padding-left: 10px;  font-family: undefined;">
+        <p>
+            <strong>Ready to get started?:</strong> Register for a free trial of EasyTerritory Enterprise by clicking the button below.<br><br>
+            <button class="btn btn-success btn-lg " id="EztFreeTrial" onclick="window.open('http://www.easyterritory.com/register/', '_blank')">Free Trial</button><br><br> EasyTerritory Enterprise features include:
+            <br> - Manage ZIP Code to territory alignments
+            <br> - Map CRM records
+            <br> - Create mobile maps
+            <br> - Geocode records with Microsoft Bing Maps
+            <br> - Create Marketing Lists
+            <br> - Much more
+
+        </p>
     </div>
 
     <script>
@@ -292,8 +393,7 @@
                 $("#pnlSettings").hide();
                 $("#divPnlMessage").show();
                 $('#lblMessage').text("Current User does not have sufficient security rights to read EasyTerritory Settings.\r\n\r\nPlease contact your administrator and request that Read access be granted to the EasyTerritory Settings entity.");
-            }
-            else {
+            } else {
                 if (strLatFields == "NoSettingReturned") {
                     setDefaultValue("crmAdvFindLatFields", "new_latitude,new_lat,address1_latitude");
                 }
@@ -312,11 +412,11 @@
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
                     url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet?$select=ezt_easyterritorysettingsId,ezt_Setting,ezt_SettingName,ModifiedOn",
-                    beforeSend: function (XMLHttpRequest) {
+                    beforeSend: function(XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
                     },
                     async: true,
-                    success: function (data, textStatus, xhr) {
+                    success: function(data, textStatus, xhr) {
                         var results = data.d.results;
                         for (var i = 0; i < results.length; i++) {
                             var ezt_easyterritorysettingsId = results[i].ezt_easyterritorysettingsId;
@@ -326,7 +426,7 @@
                             addSettingTableRow("divSettings", ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i.toString());
                         }
                     },
-                    error: function (xhr, textStatus, errorThrown) {
+                    error: function(xhr, textStatus, errorThrown) {
                         alert(textStatus + " " + errorThrown);
                     }
                 });
@@ -345,15 +445,15 @@
                 datatype: "json",
                 url: Xrm.Page.context.getClientUrl() + "/XRMServices/2011/OrganizationData.svc/ezt_easyterritorysettingsSet",
                 data: JSON.stringify(entity),
-                beforeSend: function (XMLHttpRequest) {
+                beforeSend: function(XMLHttpRequest) {
                     XMLHttpRequest.setRequestHeader("Accept", "application/json");
                 },
                 async: false,
-                success: function (data, textStatus, xhr) {
+                success: function(data, textStatus, xhr) {
                     var result = data.d;
                     var newEntityId = result.ezt_easyterritorysettingsId;
                 },
-                error: function (xhr, textStatus, errorThrown) {
+                error: function(xhr, textStatus, errorThrown) {
                     alert(textStatus + " " + errorThrown);
                 }
             });
@@ -395,10 +495,64 @@
 
         }
 
+        function checkEztSettingsEntityWaterfall() {
+            async.waterfall([
+                checkEztSettingsEntity
+
+            ], function(err) {
+				if(err){ 
+					console.log('Error in async Waterfall that checks ezt_easyterritorysettings entity: ' + err);
+				}
+            });
+        }
+ 
+            //this checks the settings entity in the ezt_setting field and sees if it is a free trial.  If so, display the free trial message with link to EZT.
+        function checkEztSettingsEntity(callback) {
+
+            var xhttp = new XMLHttpRequest();
+            clientUrl = parent.Xrm.Page.context.getClientUrl();
+            var eztSettingsUrl = clientUrl + "/api/data/v8.2/ezt_easyterritorysettingses?$filter=ezt_settingname eq 'EZT Instance URL'";
+            console.log(eztSettingsUrl);
+            xhttp.open("GET", eztSettingsUrl, true);
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    //console.log(this.responseText);
+
+                    var eztSettingsJson = JSON.parse(this.responseText);
+
+                    var eztSettingsValue = eztSettingsJson.value[0].ezt_setting;
+
+                    var hasBrackets = eztSettingsValue.includes("GUID")
+
+                    if (hasBrackets) {
+                        document.getElementById("freeTrialSection").style.display = "block";
+
+                    }
+
+                    callback(null);
+
+                } else if(this.readyState == 400 || this.readyState == 404) {
+					console.log("Error in querying the ezt_easyterritorysettings entity")
+				}
+            };
+
+            xhttp.onprogress = function() {
+                if (this.readyState == 1 || this.readyState == 2 || this.readyState == 3) {
+
+                }
+            }
+
+            xhttp.send();
+
+        }
+
+        window.onload = checkEztSettingsEntityWaterfall;
 
         page_OnLoad();
-
+		
     </script>
 
-</body>
-</html>
+
+
+
+</body></html>
