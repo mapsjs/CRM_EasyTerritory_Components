@@ -15,7 +15,7 @@
 		<!-- javascript azync library-->
 		<script src="../WebResources/ezt_async.js"></script>
 
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style></head>
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta></head>
 
 		<body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;"><button onclick="ezt_runJob()" class="btn btn-primary btn-lg" id="runJob">Bulk Execute Workflow</button>
         <button onclick="ezt_stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
