@@ -15,7 +15,7 @@
 		<!-- javascript azync library-->
 		<script src="../WebResources/ezt_async.js"></script>
 
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta></head>
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><meta><meta></head>
 
 		<body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;"><button onclick="ezt_runJob()" class="btn btn-primary btn-lg" id="runJob">Bulk Execute Workflow</button>
         <button onclick="ezt_stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
@@ -34,8 +34,10 @@
             //Global variables            
             
 			//set clientUrl and workflowId for testing
-            //var clientUrl = "https://eztdev.crm.dynamics.com";
-            //var workflowId = "{EAC604FF-9154-4CD1-8BE1-13AF2DDDA2F2}";
+            var clientUrl = "";
+            var workflowId = "";
+            var viewId = "";
+            var runOperationOnView;
 			var entity = "";
             var moreBlocks = true;
             var cancelClicked = false;
@@ -128,6 +130,17 @@
 					
 					//Comment workflowId and clientUrl out for debugging purposes
 					workflowId = window.parent.Xrm.Page.getAttribute('ezt_workflow').getValue()[0].id;
+
+                    try {
+
+                        viewId = window.parent.Xrm.Page.getAttribute('ezt_view').getValue()[0].id;
+                        viewEnName = window.parent.Xrm.Page.getAttribute('ezt_view').getValue()[0].name;
+                        runOperationOnView = true;
+
+                    } catch (err){
+                        runOperationOnView = false;
+                    }
+
 					clientUrl = parent.Xrm.Page.context.getClientUrl();
 						
 					workFlowFireCount = 0;
@@ -322,7 +335,13 @@
 						
 						var url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?$select=' + entityid);
 
-                      
+                        if(runOperationOnView == true){
+
+                            url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?savedQuery=' + viewId);
+
+                        }
+
+                      //CONTINUE HERE!!!
 						
                         waterfallCallback(null, url);
 
