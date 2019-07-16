@@ -28,10 +28,9 @@ class PMSETerritoryLookup extends PMSEScriptTask
             try{ 
             	
             	$recordName = $bean->name;
-              
-              
-	            $eztConfigurationSettings = $this->getEztSettings($bean, $flowData);
 
+	            $eztConfigurationSettings = $this->getEztSettings($flowData['cas_sugar_module']);
+	            
 	            $recordAddress = $this->getRecordAddress($bean, $eztConfigurationSettings);
 
 	            $token = $this->getEztToken($eztConfigurationSettings, $recordName);
@@ -42,148 +41,84 @@ class PMSETerritoryLookup extends PMSEScriptTask
 
 	            $user = $this->getTerritoryMapping($eztTerritory, $recordName);
 
-	            $userDetails = $this->getUserDetails($user, $recordName, $bean);
+	            $userDetails = $this->getUserDetails($user, $recordName);
+                //$GLOBALS['log']->fatal(print_r($flowData, true));
 
-                
+	            if($userDetails) {
+                    
+                    $assigned = $eztConfigurationSettings['modRel'];
+                    
+                    if($bean->load_relationship($assigned)){
+                         
+                         $bean->$assigned->add($userDetails['userId']);   
+                        
+                    }else{
 
-	            if(empty($userDetails) || empty($userDetails['userFullName']) || empty($userDetails['userId'])) {
-
-                    throw new Exception('Error EZT Territory Lookup. Exception thrown on line 49 of PMSETerritoryLookup.php- Cannot find $userDetails properties or record properties for territory assignment on record: ' . $recordName);
-                } else {
-
-                    //$GLOBALS['log']->fatal(print_r($bean, true));
-
-
-                    $tagField = $bean->getTagField();
-                    $tagFieldProperties = $bean->field_defs[$tagField];
-
-                    $link = 'assigned_user_link';
-
-                    if($bean->load_relationship($link)){
-
-                        $bean->$link->add($userDetails['userId']);
-
-                        //$GLOBALS['log']->fatal(print_r($bean->field_defs[$tagField], true));
+                        $GLOBALS['log']->fatal(print_r("Failed to load relationship link name '" . $assigned . "' for record: " . $recordName . ". Check to see if relationship link name is valid between modules: '". $flowData['cas_sugar_module'] ."' and 'Users'", true));
                     }
 
-                    //$rel_name = 'accounts_contacts';
-
-                    //if($bean->load_relationship($rel_name)){
-                     //   $GLOBALS['log']->fatal(print_r("HERE!" true));
-                      //  $relatedBeans = $bean->$relname->getBeans();
-                        //$GLOBALS['log']->fatal(print_r($relatedBeans, true));
-
-                    //}
-
-
-                    /*
-	                $bean->assigned_user_name = $userDetails['userFullName'];
-	                $bean->assigned_user_id = $userDetails['userId'];
-	                $bean->assigned_user_link->full_name = $userDetails['userFullName'];
-	                $bean->assigned_user_link->id = $userDetails['userId'];
-                    
-                    
-                    $rel_name = 'accounts_assigned_user';
-
-
-                    $bean->load_relationship($rel_name);
-                    $bean->$rel_name->add($userDetails['userId']);
-                      */
-        
-
-                    $latField = $eztConfigurationSettings['latitudeField'];
-                    $lonField = $eztConfigurationSettings['longitudeField'];
-                    $geoQualityField = $eztConfigurationSettings['geocodeQualityField'];
-
-                    if(!empty($latField) || !empty($lonField)){
-                        
-                        $bean->$latField = $latAndLon['lat'];
-                        $bean->$lonField = $latAndLon['lon'];
-
-                        if(!empty($geoQualityField)){
-                            
-                            $bean->$geoQualityField = $latAndLon['geocodeQuality'];
-                        }
-                        
-
-                    } else {
-
-                        $GLOBALS['log']->fatal(print_r('EZT Location Lookup notice. No latitude or longitude fields or geocode quality fields present on record: ' . $recordName, true)); 
-                    } 
-	                
-	                $bean->save(); 
-	            } 
+	            } else {
+	            	$GLOBALS['log']->fatal(print_r("No user found in Ezt Territory Lookup.", true));
+	            }
+	        }
 	        
-	        
-	        } catch(Exception $ex) {
+	        catch(Exception $ex) {
 
 	        	$GLOBALS['log']->fatal(print_r($ex->getMessage(), true));  	
 	        	
 	        }
-        //return(true);
             
     }
+
 	
 	/**
      * Gets the setting's values for EZT customer. 
      *
      * @return array
      */
-    protected function getEztSettings($bean, $flowData) { 
-
-
-            $advancedWorkflowModule = $flowData['cas_sugar_module'];
+    protected function getEztSettings($module) {
 
             $sugarQuery = new SugarQuery();
 
-            $sugarQuery->from(BeanFactory::newBean('EztV1_EasyTerritory_Settings'));
+            $sugarQuery->from(BeanFactory::newBean('EztV1_EztSettings'));
  
-            $sugarQuery->select(array('id', 'targetmodule_c'));
-            $sugarQuery->where()->equals('targetmodule_c', $advancedWorkflowModule);
-
+            $sugarQuery->select(array('id','targetmodulename'));
+           
+            $sugarQuery->where()->equals('targetmodulename', $module);
            
             $resultSet = $sugarQuery->execute();
-            //$GLOBALS['log']->fatal(print_r($resultSet, true)); 
+            
             $countResults = count($resultSet);
 
            if($countResults == 0){
 
-           		throw new Exception("Error in Ezt_Settings module.  There are no records in Ezt_settings module.");
+           		throw new Exception("Error in querying Ezt_Settings module.  Please check to make sure settings are correct.");
                 
            } elseif ($countResults == 1){ 
 
                 //$userModule = BeanFactory::getBean('Users', $result[0]['id']); 1a4e41e4-73eb-11e8-85cb-0800270fcb6c
-                $eztSettingsModule = BeanFactory::getBean('EztV1_EasyTerritory_Settings', $resultSet[0]['id']); 
+                $eztSettingsModule = BeanFactory::getBean('EztV1_EztSettings', $resultSet[0]['id']); 
 
 
                 $easyterritoryURL = $eztSettingsModule->easyterritoryurl;
-                $mapdotneturl = $eztSettingsModule->mapdotneturl;
                 $easyterritoryprojectid = $eztSettingsModule->easyterritoryprojectid;
-                $easyterritoryusername = $eztSettingsModule->easyterritoryusername;
+                $easyterritoryusername = $eztSettingsModule->username;
                 $easyterritorypassword = $eztSettingsModule->easyterritorypassword;
                 $locationlookupstreetfield = $eztSettingsModule->locationlookupstreetfield;
                 $locationlookupcityfield = $eztSettingsModule->locationlookupcityfield;
                 $locationlookupstatefield = $eztSettingsModule->locationlookupstatefield;
                 $locationlookupzipfield =  $eztSettingsModule->locationlookupzipfield;
-                $locationlookupcountryfield = $eztSettingsModule->countrycodefield_c;
                 $bingkey = $eztSettingsModule->bingkey;
-                $latitudeField = $eztSettingsModule->latitudefield_c;
-                $longitudeField = $eztSettingsModule->longitudefield_c;
-                $geocodeQualityField = $eztSettingsModule->geocodequality_c;
-                $targetModule = $eztSettingsModule->targetmodule_c;
-                $territorySqlColumnName = $eztSettingsModule->territorycolumnname_c;
-                $whereClause = $eztSettingsModule->whereclause_c;
-                $territoryId = $eztSettingsModule->territoryidcolumnname_c;
+                $moduleRel = $eztSettingsModule->modulerelationshipname;
 
-                if(empty($easyterritoryURL) || empty($mapdotneturl) || empty($easyterritoryprojectid) || empty($easyterritoryusername) || empty($easyterritorypassword) || empty($locationlookupstreetfield) || empty($locationlookupcityfield) || empty($locationlookupstatefield) || empty($locationlookupzipfield) || empty($bingkey)) {
+                if(empty($easyterritoryURL)  || empty($easyterritoryprojectid) || empty($easyterritoryusername) || empty($easyterritorypassword) || empty($bingkey))  {
 
-                		throw new Exception("Error EZT Territory Lookup. One or more fields do not have values in Ezt_Settings module.");
+                		throw new Exception("Error EZT Territory Lookup. One or more fields do not have values in Ezt_Settings module -> easyterritory url, easyterritory project Id, username, password, bingkey");
 
                 } else {
                 
 
-		                $eztSettingsData = array("easyterritoryUrl" => $easyterritoryURL, 
-		                                        "mapDotNet" => $mapdotneturl,
+		                $eztSettingsData = array("easyterritoryUrl" => $easyterritoryURL,
 		                                        "easyterritoryProjectId" => $easyterritoryprojectid,
 		                                        "easyterritoryUserName" => $easyterritoryusername,
 		                                        "easyterritoryPassword" => $easyterritorypassword,
@@ -191,15 +126,8 @@ class PMSETerritoryLookup extends PMSEScriptTask
 		                                        "locationLookupCity" => $locationlookupcityfield,
 		                                        "locationLookupState" => $locationlookupstatefield,
 		                                        "locationLookupZipField" => $locationlookupzipfield,
-                                                "locationLookupCountry" => $locationlookupcountryfield,
 		                                        "bingKey" => $bingkey,
-                                                "latitudeField" => $latitudeField,
-                                                "longitudeField" => $longitudeField,
-                                                "geocodeQualityField" => $geocodeQualityField,
-                                                "targetModule" => $targetModule,
-                                                "territorySqlColumnName" => $territorySqlColumnName,
-                                                "whereClause" => $whereClause,
-                                                "territoryId" => $territoryId,
+                                                "modRel" => $moduleRel,
 		                                        ); 
 		                         
 		                return $eztSettingsData;
@@ -207,8 +135,8 @@ class PMSETerritoryLookup extends PMSEScriptTask
 
             } else {
 
-            	throw new Exception("Error in Ezt_Settings module. More than of record in Ezt_settings module that is registered with module " . $advancedWorkflowModule);
-                
+            	throw new Exception("Error in Ezt_Settings module. More than of record in Ezt_settings module.");
+   
             }
 
     }
@@ -226,23 +154,16 @@ class PMSETerritoryLookup extends PMSEScriptTask
             $addressStreet = $eztDataSettings['locationLookupStreet'];
             $addressCity = $eztDataSettings['locationLookupCity'];
             $addressState = $eztDataSettings['locationLookupState'];
-            $adddressZip = $eztDataSettings['locationLookupZip'];
-            $addressCountry = $eztDataSettings['locationLookupCountry'];
-
-
+            $adddressZip = $eztDataSettings['locationLookupZipField'];
                
 	        $street = $bean->$addressStreet;
 	        $city = $bean->$addressCity;
 	        $state = $bean->$addressState;
 	        $zip = $bean->$addressZip;
-            $country = $bean->$addressCountry;
-            
-
-
 	            
-	        if(empty($street) && empty($city) && empty($state) && empty($zip) && empty($targetSugarModule) && empty($sqlTerritoryColumn)){
+	        if(empty($street) && empty($city) && empty($state) && empty($zip)){
 
-            	throw new Exception("Error EZT Territory Lookup. Fields not populated for record " . $bean->name);
+            	throw new Exception("Error EZT Territory Lookup. Address fields not populated for record " . $bean->name);
 
             } else{
 	            
@@ -251,8 +172,6 @@ class PMSETerritoryLookup extends PMSEScriptTask
 	                                "city" => $city,
 	                                "state" => $state,
 	                                "zip" => $zip,
-                                    "country" => $country,
-
 	            );
 	            
 	            
@@ -269,15 +188,29 @@ class PMSETerritoryLookup extends PMSEScriptTask
      */
     protected function getEztToken($eztDataSettings, $recordName) {
 
-            $data = array("username" => $eztDataSettings['easyterritoryUserName'], "password" => $eztDataSettings['easyterritoryPassword']);                                                                    
+            $c = base64_decode($eztDataSettings['easyterritoryPassword']);
+            $key = "4e9eb050-7711-46e0-8e9f-1104c2f78d45";
+            $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+            $iv = substr($c, 0, $ivlen);
+            $hmac = substr($c, $ivlen, $sha2len=32);
+            $ciphertext_raw = substr($c, $ivlen+$sha2len);
+            $pass = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+            $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+            
+            if (hash_equals($hmac, $calcmac))//PHP 5.6+ timing attack safe comparison
+            {
+                $password = $pass;
+            }
+            //$GLOBALS['log']->fatal(print_r($password, true));
+            //$GLOBALS['log']->fatal(print_r($eztDataSettings['easyterritoryUserName'], true));
+            $data = array("username" => $eztDataSettings['easyterritoryUserName'], "password" => $password);                                                                    
             $data_string = json_encode($data);
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $eztDataSettings['easyterritoryUrl'] . '/REST/Login/Login');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);  
-            curl_setopt($ch, CURLOPT_FAILONERROR, true);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);        
+            curl_setopt($ch, CURLOPT_FAILONERROR, true);        
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);  
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));                        
             
@@ -292,7 +225,7 @@ class PMSETerritoryLookup extends PMSEScriptTask
 
             if(isset($curlError)){
 
-            	throw new Exception("Error EZT Location Lookup. Retrieving Easyterritory OItoken failed for record " . $recordName . ": " . $curlError);
+            	throw new Exception("Error EZT Location Lookup. Retrieving Easyterritory OItoken failed with url: " . $eztDataSettings['easyterritoryUrl'] . "/REST/Login/Login" . ", for record: " . $recordName . ", Error Details: " . $curlError);
             	
             } else{ 
 
@@ -315,7 +248,7 @@ class PMSETerritoryLookup extends PMSEScriptTask
 
 
             //$data = array("keyCustomer" => "9c95ba67-2f48-48b9-845c-1d705229b77c", "keyBing" => "","addressList" => [""]);   
-            $data = array("keyCustomer" => "9c95ba67-2f48-48b9-845c-1d705229b77c", "keyBing" => $eztDataSettings['bingKey'], "addressList" => [$recordAddress['street'] . ',' . $recordAddress['city'] . ',' . $recordAddress['state'] . ',' . $recordAddress['zip'] . ',' . $recordAddress['country']]); 
+            $data = array("keyCustomer" => "9c95ba67-2f48-48b9-845c-1d705229b77c", "keyBing" => $eztDataSettings['bingKey'], "addressList" => [$recordAddress['street'] . ',' . $recordAddress['city'] . ',' . $recordAddress['state'] . ',' . $recordAddress['zip']]); 
             
             $data_string = json_encode($data);
 
@@ -325,7 +258,6 @@ class PMSETerritoryLookup extends PMSEScriptTask
             curl_setopt($ch, CURLOPT_POST, 1);  
             curl_setopt($ch, CURLOPT_FAILONERROR, true); 
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string); 
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); 
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));     
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Cookie: oitoken= ' . $eztToken));
  
@@ -348,7 +280,7 @@ class PMSETerritoryLookup extends PMSEScriptTask
 
 	            $decoded = json_decode($data, true);
 	            
-	            $latAndLon = array("lat" => $decoded[results][0][location][lat] , "lon" => $decoded[results][0][location][lon], "geocodeQuality" => $decoded[results][0][qualityString]);
+	            $latAndLon = array("lat" => $decoded[results][0][location][lat] , "lon" => $decoded[results][0][location][lon]);
 
 	            if(empty($latAndLon['lat']) && empty($latAndLon['lon'])){
 
@@ -371,26 +303,9 @@ class PMSETerritoryLookup extends PMSEScriptTask
     protected function mdnRecordLookup($eztToken, $latLon, $eztDataSettings, $recordName) {
 
             $ch = curl_init();
-
-            if(empty($eztDataSettings['whereClause'])){
-
-                $restMDNUrl = $eztDataSettings['mapDotNet'] . '/rest/9.0/Map/EasyTerritory/Features/' . $eztDataSettings['easyterritoryProjectId'] . '/WKT/POINT(' . $latLon['lon'] . '%20' . $latLon['lat'] .')?Format=JSON&ReturnShapes=0&ReturnTypes=0&Fields='. $eztDataSettings['territorySqlColumnName'] . ',' . $eztDataSettings['territoryId'] . '&EPSG=4326';
-
-                //$GLOBALS['log']->fatal(print_r($restMDNUrl, true));
-
-            } else {
-
-
-                $urlEncodeWhere = urlencode($eztDataSettings['whereClause']);
-
-                $restMDNUrl = $eztDataSettings['mapDotNet'] . '/rest/9.0/Map/EasyTerritory/Features/' . $eztDataSettings['easyterritoryProjectId'] . '/WKT/POINT(' . $latLon['lon'] . '%20' . $latLon['lat'] .')?Format=JSON&ReturnShapes=0&ReturnTypes=0&Fields='. $eztDataSettings['territorySqlColumnName'] . ',' . $eztDataSettings['territoryId'] . '&EPSG=4326&where=' . $urlEncodeWhere;                        
-
-            }
-
-            curl_setopt($ch, CURLOPT_URL, $restMDNUrl);
+            curl_setopt($ch, CURLOPT_URL, $eztDataSettings['easyterritoryUrl'] . '/REST/ProjectMarkupPolygon/' . $eztDataSettings['easyterritoryProjectId'] . '/location?lat=' . $latLon['lat'] . '&lon=' . $latLon['lon'] .'&omitWkt=true&omitMetadata=true');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_FAILONERROR, true); 
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); 
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json')); 
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Cookie: oitoken=' . $eztToken));
 
@@ -406,7 +321,7 @@ class PMSETerritoryLookup extends PMSEScriptTask
             if(isset($curlError)){
 
 
-            	throw new Exception("Error EZT Location Lookup. Request error when getting territory name for record " . $recordName . ": " . $curlError);
+            	throw new Exception("Error EZT Location Lookup. With url: ". $eztDataSettings['easyterritoryUrl'] . "/REST/ProjectMarkupPolygon/" . $eztDataSettings['easyterritoryProjectId'] . "/location?lat=" . $latLon['lat'] . "&lon=" . $latLon['lon'] .'&omitWkt=true&omitMetadata=true' ." Request error when getting territory name for record " . $recordName . ": " . $curlError);
             	
             }
             else {
@@ -414,19 +329,13 @@ class PMSETerritoryLookup extends PMSEScriptTask
 	           
 	            $decoded = json_decode($data, true);
 
-	            if(empty($decoded[Values][0][0])){
+	            if(empty($decoded[0][tag])){
 
-	            	throw new Exception('Error EZT Location Lookup. Failed to retrieve territory name for record '. $recordName .' from ' . $restMDNUrl);
+	            	throw new Exception('Error EZT Location Lookup. Failed to retrieve territory for record '. $recordName .' from: ' . $eztDataSettings['easyterritoryUrl'] . '/REST/ProjectMarkupPolygon/' . $eztDataSettings['easyterritoryProjectId'] . '/location?lat=' . $latLon['lat'] . '&lon=' . $latLon['lon'] .'&omitWkt=true&omitMetadata=true,  json returned:' . strval($decoded) );
 	            }
 	            else {
 
-	            	
-                    $eztTerritoryArray = array('name' => $decoded[Values][0][0], 
-                                          'id' =>   $decoded[Values][0][1],
-                            ); 
-                    //$GLOBALS['log']->fatal(print_r($eztTerritoryArray, true));
-                    return $eztTerritoryArray; 
-
+	            	return $decoded[0][markupId];
 	        	}
         	}
     }
@@ -442,35 +351,34 @@ class PMSETerritoryLookup extends PMSEScriptTask
 
             //require_once('include/SugarQuery/SugarQuery.php');
 
-            $eztTerritoryId = $territory['id'];
-
             $sugarQuery = new SugarQuery();
-            $sugarQuery->from(BeanFactory::newBean('EztV1_EZT_Territory_Mapping'));
+            $sugarQuery->from(BeanFactory::newBean('EztV1_EztTerritories'));
  
-            $sugarQuery->select(array('id','name','territoryid_c'));
+            $sugarQuery->select(array('id','eztmarkupid','assigned_user_name'));
            
-            $sugarQuery->Where()->equals('territoryid_c', $eztTerritoryId);
-
+            $sugarQuery->Where()->equals('eztmarkupid', $territory);
 
             $result = $sugarQuery->execute();
-            
+
             $count = count($result);
 
             if($count == 0){
 
-                throw new Exception("Error EZT Location Lookup. Error in getTerritoryMapping() function.  Cannot map territory name to user for territory: " . $territory['name'] . " with ID " . $territory['id']);
+                throw new Exception("Error EZT Location Lookup. Error in getTerritoryMapping() function.  Cannot map territory name to user for territory: " . $territory);
             } elseif ($count == 1){
 
-                $EztMappingBean = BeanFactory::getBean('EztV1_EZT_Territory_Mapping', $result[0]['id']);
-
+                $EztMappingBean = BeanFactory::getBean('EztV1_EztTerritories', $result[0]['id']);             
+                
                 $user = $EztMappingBean->territoryowner;
 
-                return $user;
-
+                $assignedUser = $EztMappingBean->assigned_user_id;
+             
+                //return $user;
+                return $assignedUser;
 
             } else {
 
-            	throw new Exception("Error EZT Location Lookup. Error in getTerritoryMapping() function.  There are multiple mapping records for this territory: " . $territory['name'] . " with ID: " . $territory['id']);
+            	throw new Exception("Error EZT Location Lookup. Error in getTerritoryMapping() function.  There are multiple mapping records for this territory: " . $territory);
 
             }
 
@@ -482,7 +390,9 @@ class PMSETerritoryLookup extends PMSEScriptTask
      * @param string $sugarUser
      * @return array $user Returns users id and full name.
      */
-    protected function getUserDetails($sugarUser, $recordName, $bean){
+    protected function getUserDetails($sugarUser, $recordName){
+
+            
 
             $sugarQuery = new SugarQuery();
 
@@ -490,7 +400,7 @@ class PMSETerritoryLookup extends PMSEScriptTask
  
             $sugarQuery->select(array('id','first_name','last_name','user_name'));
            
-            $sugarQuery->where()->equals('user_name', $sugarUser);
+            $sugarQuery->where()->equals('id', $sugarUser);
            
 
             $resultSet = $sugarQuery->execute();
@@ -501,35 +411,45 @@ class PMSETerritoryLookup extends PMSEScriptTask
 
                 throw new Exception("Error EZT Location Lookup. Error in getUserDetails() function when processing " . $recordName . ".  Cannot find user in users module: " . $sugarUser);
            } elseif ($countResults == 1){ 
-
+ 
                 //$userModule = BeanFactory::getBean('Users', $result[0]['id']); 1a4e41e4-73eb-11e8-85cb-0800270fcb6c
-                $userModule = BeanFactory::getBean('Users', $resultSet[0]['id']); 
+                $userModule = BeanFactory::getBean('Users', $resultSet[0]['id']);
+                
                 $userId = $userModule->id;
                 $userFullName = $userModule->name;
                
-                $sugarUserDetails = array('userFullName' => $userFullName , 'userId' => $userId);
+                $sugarUserDetails = array('userFullName' => $userName , 'userId' => $userId);
 
-                
-                //$rel_name = 'accounts';
-
-
-                //$userModule->load_relationship('accounts_assigned_user'));
-                //{
-                  //      $relatedBeans = $bean->accounts->getBeans();
-                  //  $test = $userModule->load_relationship('accounts_assigned_user');
-                        //$GLOBALS['log']->fatal(print_r($relatedBeans, true));
-
-                //}
-
-
-                //$userModule->$rel_name->add($bean->id);
-                //$userModule->save();
-                
                 return $sugarUserDetails;
-                
+
 
             }
-    } 
-    
+    }
+
+    /**
+     * Decrypts the users password. 
+     *
+     * @param string $ciphertext
+     * @return plain text string of password.
+     */
+    protected function decryptPass($ciphertext){
+        
+        $c = base64_decode($ciphertext);
+        $key = "4e9eb050-7711-46e0-8e9f-1104c2f78d45";
+        $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+        $iv = substr($c, 0, $ivlen);
+        $hmac = substr($c, $ivlen, $sha2len=32);
+        $ciphertext_raw = substr($c, $ivlen+$sha2len);
+        $original_plaintext = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+        $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+        //if (hash_equals($hmac, $calcmac))//PHP 5.6+ timing attack safe comparison
+        //{
+            return $original_plaintext;
+        //}else{
+
+            
+        //}
+
+    }   
 }
 
