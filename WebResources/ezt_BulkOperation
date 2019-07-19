@@ -1,66 +1,92 @@
 <html><head>
 
-		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-		<!-- jQuery library -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-		<!-- Latest compiled JavaScript -->
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-		<!-- Xrm.Page model -->
-		<script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+        <!-- Xrm.Page model -->
+        <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
 
-		<!-- javascript azync library-->
-		<script src="../WebResources/ezt_async.js"></script>
+        <!-- javascript azync library-->
+        <script src="../WebResources/ezt_async.js"></script>
 
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><meta><meta></head>
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><meta></head>
 
-		<body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;"><button onclick="ezt_runJob()" class="btn btn-primary btn-lg" id="runJob">Bulk Execute Workflow</button>
+        
+        <body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;">
+            <button onclick="ezt_getView()" class="btn btn-primary btn-lg" id="getViewEntity">Get View</button>
+        
+
+            <button onclick="ezt_runJob()" class="btn btn-success btn-lg" id="runJob" style="visibility: hidden;">Bulk Execute Workflow</button>
         <button onclick="ezt_stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
 
     
 
-		<!-- This is paragraph elements for the output of script -->
-		<p style="color:red; margin-left:10px; visibility: hidden;" id="cancel"> </p>
-		<p style="margin-left:10px; visibility: hidden;" id="ezt"> </p>
-		<p style="margin-left:10px; visibility: hidden;" id="errors">Log: </p>
+        <!-- This is paragraph elements for the output of script -->
+        <p style="color:red; margin-left:10px; visibility: hidden;" id="cancel"> </p>
+        <p style="margin-left:10px; visibility: hidden;" id="ezt"> </p>
+
+        <p style="margin-left:10px; visibility: hidden;" id="errors">Log: </p>
+        <p style="margin-left:10px; visibility: visible;" id="divCheckList"> </p>
 
     <script>
-	
+    
         (function() {
 
             //Global variables            
             
-			//set clientUrl and workflowId for testing
+            //set clientUrl and workflowId for testing
             var clientUrl = "";
             var workflowId = "";
-            var viewId = "";
-            var runOperationOnView;
-			var entity = "";
+            var entity = "";
             var moreBlocks = true;
             var cancelClicked = false;
             
             var workFlowFireCount = 0;
             var areFieldsFilledIn = true;
+            var eztObject = [];
 
+            function getCrmView() {
+                
+                setValuesForJob();
+
+                async.waterfall([             
+                
+                    getEntity,
+                    getSystemViews,
+                    getUserViews
+                     
+                        
+                ], function(err) {
+                    
+               
+                });
+
+
+            }
 
             function startTheScript() {
-					//this sets the variables from the form for runJob()    
-					setValuesForJob();
-				async.waterfall([             
+                    //this sets the variables from the form for runJob()    
+                    //setValuesForJob();
+                    getViewsFromCheckBox();
+                async.waterfall([            
                 
-				    getEntity,
-					getPluralEntityName
+                        getEntity,
+                        getPluralEntityName
+                  
                 
-					
-                    	
-				], function(err, url) {
-					
+                    
+                        
+                ], function(err, url) {
+                    
                     runJob(url);
                
-			    });
+                });
             }
 
             
@@ -90,21 +116,24 @@
 
                     function() {
                         //This tests to see if we should go to the next block
-						
-						if(!moreBlocks) {
-								if (cancelClicked == false && areFieldsFilledIn == true) {
-									document.getElementById("cancel").innerHTML = ("Job Complete!"); {
-										document.getElementById("cancel").style.visibility = "visible";
-									}
-								}
-								else {
-									{
-										document.getElementById("runJob").disabled = false;
-									}
-								}
-							//When the job is done make button visiable again to run the job a second time	
-							document.getElementById("runJob").disabled = false;	
-						}
+                        
+                        if(!moreBlocks) {
+                                if (cancelClicked == false && areFieldsFilledIn == true) {
+                                    document.getElementById("cancel").innerHTML = ("Job Complete!"); {
+                                        document.getElementById("cancel").style.visibility = "visible";
+                                    }
+                                    document.getElementById("getViewEntity").disabled = false;
+                                }
+                                else {
+                                    {
+                                        document.getElementById("runJob").disabled = false;
+                                        document.getElementById("getViewEntity").disabled = false;
+                                    }
+                                }
+                            //When the job is done make button visiable again to run the job a second time  
+                            document.getElementById("runJob").disabled = false; 
+                            document.getElementById("getViewEntity").disabled = false;
+                        }
                         return moreBlocks;
                     },
                     function(doneWithBlock) {
@@ -125,40 +154,32 @@
  
  
             function setValuesForJob() {
-			//this sets the values from the form the user plugs in to variables used in script
-				try {
-					
-					//Comment workflowId and clientUrl out for debugging purposes
-					workflowId = window.parent.Xrm.Page.getAttribute('ezt_workflow').getValue()[0].id;
+            //this sets the values from the form the user plugs in to variables used in script
+                try {
 
-                    try {
+                    document.getElementById("ezt").innerHTML = "";
+                    document.getElementById("cancel").innerHTML = ("");
+                    //Comment workflowId and clientUrl out for debugging purposes
+                    workflowId = window.parent.Xrm.Page.getAttribute('ezt_workflow').getValue()[0].id;
+                    clientUrl = parent.Xrm.Page.context.getClientUrl();
 
-                        viewId = window.parent.Xrm.Page.getAttribute('ezt_view').getValue()[0].id;
-                        viewEnName = window.parent.Xrm.Page.getAttribute('ezt_view').getValue()[0].name;
-                        runOperationOnView = true;
+                    entity = "";
+                        
+                    workFlowFireCount = 0;
+                    
+                    cancelClicked = false;
+                    document.getElementById("errors").innerHTML = ("");
+                    areFieldsFilledIn = true;
+                    moreBlocks = true;
 
-                    } catch (err){
-                        runOperationOnView = false;
+                    } catch (err) {
+
+                        document.getElementById("errors").innerHTML = ("Please provide valid values into the form fields. <br />");
+                        moreBlocks = false;
+                        areFieldsFilledIn = false;
                     }
 
-					clientUrl = parent.Xrm.Page.context.getClientUrl();
-						
-					workFlowFireCount = 0;
-					
-					cancelClicked = false;
-					document.getElementById("errors").innerHTML = ("");
-					areFieldsFilledIn = true;
-					moreBlocks = true;
-
-					} catch (err) {
-
-						document.getElementById("errors").innerHTML = ("Please provide valid values into the form fields. <br />");
-						moreBlocks = false;
-						areFieldsFilledIn = false;
-					}
-
-				}
- 
+                }
  
 
             //This gets a block of records from an entity in CRM. 
@@ -179,12 +200,12 @@
                         
                         
 
-						//display number of records being retrieved in status
+                        //display number of records being retrieved in status
                         document.getElementById("ezt").innerHTML = ("Retrieving: " + json.value.length + " records");
 
                         processBlock(block, doneWithBlock);
 
-                        // this gets the next page of records link		
+                        // this gets the next page of records link      
                         var urlNext = json["@odata.nextLink"];
 
                         //if user clicks cancel job moreBlocks is set to false and skips over typeof uri because we don't want more pages, want to be done with loop.
@@ -195,8 +216,8 @@
                             }
 
                         }
-						
-						nextUrlCallback(urlNext);
+                        
+                        nextUrlCallback(urlNext);
 
                     } else if (this.status == 404 || this.status == 400) {
                         //this error will occur if an entity that does not exist
@@ -248,7 +269,7 @@
 
                     //Define the query to execute the action
                     query = "workflows(" + workflowId.replace("}", "").replace("{", "") + ")/Microsoft.Dynamics.CRM.ExecuteWorkflow";
-					
+                    
 
 
                     var data = {
@@ -257,11 +278,11 @@
 
                     //Create request
                     // request url
-					
+                    
                     var completeUrl = clientUrl + "/api/data/v8.2/" + query;
-					
+                    
                     var req = new XMLHttpRequest();
-					
+                    
                     req.open("POST", completeUrl, true);
                     req.setRequestHeader("Accept", "application/json");
                     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
@@ -314,8 +335,8 @@
 
             }
 
-			
-			function getPluralEntityName(entity, entityid, waterfallCallback) {
+            
+            function getPluralEntityName(entity, entityid, waterfallCallback) {
 
 
                 var entitypluralURL = clientUrl +
@@ -326,23 +347,29 @@
                 var Enxhttp = new XMLHttpRequest();
                 Enxhttp.open("GET", entitypluralURL, true);
                 Enxhttp.onreadystatechange = function() {
-					
+                    
                     if (this.readyState == 4 && this.status == 200) {
 
                         var entityJson = JSON.parse(this.responseText);
 
                         var entityPluralName = entityJson.value[0].LogicalCollectionName;
-						
-						var url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?$select=' + entityid);
+                        
+                        //var url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?$select=' + entityid);
+                        var url = "";
+                        
+                        if(eztObject.length !== 0){
+                            if(eztObject[0].queryType == 'systemQuery'){
 
-                        if(runOperationOnView == true){
+                                url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?savedQuery=' + eztObject[0].queryId);
 
-                            url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?savedQuery=' + viewId);
+                            } else if (eztObject[0].queryType == 'userQuery'){
 
+                                url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?userQuery=' + eztObject[0].queryId);
+
+                            }
                         }
-
-                      //CONTINUE HERE!!!
-						
+                       
+                        
                         waterfallCallback(null, url);
 
 
@@ -353,12 +380,12 @@
                 };
 
                 Enxhttp.send();
-			}
+            }
 
 
             function getEntity(waterfallCallback) {
                
-			   
+               
                var endPoint = workflowId.replace("}", "").replace("{", "");
 
                 var EntityUrl = (clientUrl + '/api/data/v8.2/workflows?$select=name,primaryentity&$filter=workflowid eq (' + endPoint + ')');
@@ -377,20 +404,179 @@
                         var entityid = (entity + "id");
 
                         waterfallCallback(null, entity, entityid);
-						
+                        
                     } else if (this.status == 400 || this.status == 404 || this.status == 500) {
                         document.getElementById("errors").innerHTML += (this.responseText);
-						
+                        
                         waterfallCallback(err);
                     }
                 };
                 call.send();
             }
 
-            
+            function getSystemViews(entity, entityid, waterfallCallback){
+
+                document.getElementById("ezt").style.visibility = "visible";
+
+                var myDoc = document.getElementById("ezt");
+
+                var getSavedQuery = clientUrl + "/api/data/v8.2/savedqueries?$select=name,savedqueryid,returnedtypecode&$filter=returnedtypecode eq '" + entity + "'"; 
+
+                var call = new XMLHttpRequest();
+                call.open("GET", getSavedQuery, true);
+
+                call.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+
+                        var json = JSON.parse(this.responseText);
+                        /*
+                        json.value.forEach(function(x){
+
+                            document.getElementById("ezt").innerHTML += ('checkBox:  ' + x.name + '<br />');
+                            console.log(x.name);
+
+                        }) */
+
+                     for (var i = 0; i < json.value.length; i++) {
+
+                            var viewName = json.value[i].name;
+                            var entityOfView = json.value[i].returnedtypecode;
+                            var viewSavedQueryId = json.value[i].savedqueryid;
+                            var typeOfQuery = 'systemQuery';
+
+                            addCheckboxItem(entityOfView,'divCheckList',viewName,viewSavedQueryId, typeOfQuery);
+                    }
+
+                        waterfallCallback(null, entity, entityid);
+                        
+                    } else if (this.status == 400 || this.status == 404 || this.status == 500) {
+                        document.getElementById("errors").innerHTML += (this.responseText);
+                        
+                        waterfallCallback();
+                    }
+                };
+                call.send();
+
+            }
+
+            function getUserViews(entity, entityid, waterfallCallback){
+
+                var getUserQuery = clientUrl + "/api/data/v8.2/userqueries?$select=name,userqueryid,returnedtypecode&$filter=returnedtypecode eq '" + entity + "'"; 
+
+                var call = new XMLHttpRequest();
+                call.open("GET", getUserQuery, true);
+
+                call.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+
+                        var json = JSON.parse(this.responseText);
+                        /*
+                        json.value.forEach(function(x){
+
+                            document.getElementById("ezt").innerHTML += ('checkBox:  ' + x.name + '<br />');
+                            console.log(x.name);
+
+                        }) */
+
+                     for (var i = 0; i < json.value.length; i++) {
+
+                            var viewName = json.value[i].name;
+                            var entityOfView = json.value[i].returnedtypecode;
+                            var viewSavedQueryId = json.value[i].userqueryid;
+                            var typeOfQuery = 'userQuery';
+
+                            addCheckboxItem(entityOfView,'divCheckList',viewName,viewSavedQueryId,typeOfQuery);
+                    }
+
+                        waterfallCallback(null, entity, entityid);
+                        
+                    } else if (this.status == 400 || this.status == 404 || this.status == 500) {
+                        document.getElementById("errors").innerHTML += (this.responseText);
+                        
+                        waterfallCallback();
+                    }
+                };
+                call.send();
+
+            }
+
+
+        function addCheckboxItem(entityOfView, divName, viewName, viewSavedQueryId, typeOfQuery) {
+
+            document.getElementById("divCheckList").style.visibility = "visible";
+            var cbViews = document.getElementById("divCheckList");
+            var label = document.createElement("label");
+            var description = document.createTextNode(" [" + entityOfView + "] - " + viewName);
+            var checkbox = document.createElement("input");
+
+            checkbox.type = "radio";
+            checkbox.name = "cbViews";
+            checkbox.value =  viewName + "|" + entityOfView + "|" + viewSavedQueryId + "|" + typeOfQuery;
+
+            // TODO:  Figure out how to make this work...
+            // checkbox.onkeyup = 'checkEnableButton()';
+
+            label.appendChild(checkbox);
+            label.appendChild(description);
+
+            // add the label element to your div
+            document.getElementById(divName).appendChild(label);
+            document.getElementById(divName).appendChild(document.createElement("br"));
+
+            document.getElementById("getViewEntity").disabled = true;
+            document.getElementById("runJob").style.visibility = "visible";
+
+        }
+
+        function getViewsFromCheckBox(){
+
+            document.getElementById("errors").innerHTML = "";
+            //document.getElementById("divCheckList").innerHTML = ("");
+            var cbViews = document.getElementById("divCheckList");
+            var listLength = cbViews.children.length;
+            eztObject = [];
+
+            for (var i = 0; i < listLength; i += 2) {
+                if (cbViews.children[i].children[0].checked) {
+                    var strLabelValue = cbViews.children[i].children[0].value;
+                    // var strLabel = cbViews.children[i].children[0].label;
+                    var strLabel = cbViews.children[i].innerText.trim();
+                    var strArrayValueData = strLabelValue.split('|');
+                    var strViewName = strArrayValueData[0];
+                    var strViewType = strArrayValueData[1];
+                    var strViewQueryId = strArrayValueData[2];
+                    var strTypeOfQuery = strArrayValueData[3];
+                    eztObject.push({
+                        view: strViewName,
+                        entity: strViewType,
+                        queryId: strViewQueryId,
+                        queryType: strTypeOfQuery
+                    });
+                }
+            }
+
+            if(eztObject.length == 0){ 
+
+               
+                document.getElementById("errors").style.visibility = "visible";
+                document.getElementById("errors").innerHTML = ("View not selected. Please retrieve list of views again and select a view. <br />");
+                document.getElementById("getViewEntity").disabled = false;
+                document.getElementById("divCheckList").innerHTML = "";
+                moreBlocks = false;
+                areFieldsFilledIn = false;
+                    
+            }   else{
+
+                document.getElementById("divCheckList").style.visibility = "hidden";
+                document.getElementById("divCheckList").innerHTML = "";
+            }
+
+        }
 
             window.ezt_runJob = startTheScript;
             window.ezt_stopJob = stopJob;
+
+            window.ezt_getView = getCrmView;
         })();
     </script>
 
