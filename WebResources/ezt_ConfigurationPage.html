@@ -10,6 +10,9 @@
     <!-- javascript azync library-->
     <script src="../WebResources/ezt_async.js"></script>
 
+    <!-- ezt custom css -->
+    <link rel="stylesheet" type="text/css" href="../../WebResources/ezt_webResourceStyles.css">
+
     <script>
         function btnUpdateSettings_OnClick() {
             var tblTbody = document.getElementById("tblTbody");
@@ -21,11 +24,13 @@
                 var inputTxtSettingValue = document.getElementsByName("txtSettingValue_" + i.toString())[0].value;
                 var inputTxtSettingID = document.getElementById("hidden_" + i.toString()).value;
 
-                var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
-                // Only update value if it's changed...
-                if (strTestSettingValue.toString().toLowerCase() != inputTxtSettingValue.toLowerCase()) {
-                    EZT.Utilities.updateEZTSettingValue(inputTxtSettingID, inputTxtSettingValue);
-                    settingsUpdated = true;
+                if(inputTxtSettingValue.toString().toLowerCase() != '[password was entered]'){
+                    var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
+                    // Only update value if it's changed...
+                    if (strTestSettingValue.toString().toLowerCase() != inputTxtSettingValue.toLowerCase()) {
+                        EZT.Utilities.updateEZTSettingValue(inputTxtSettingID, inputTxtSettingValue);
+                        settingsUpdated = true;
+                    }
                 }
 
             }
@@ -135,7 +140,7 @@
     <style>
         body {
             overflow: hidden;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: Segoe\000020UI,Tahoma,Arial;
             font-size: 12px;
         }
 
@@ -227,12 +232,19 @@
             border: none;
             outline: none;
         }
+
+        .freeTrial {
+      
+            font-family: Segoe\000020UI,Tahoma,Arial;
+            font-size: 16px;
+         }
     </style>
 
     <meta>
     <meta>
     <style type="text/css">
         P {
+            font-family: Segoe\000020UI,Tahoma,Arial;
             margin: 0;
         }
     </style>
@@ -308,13 +320,13 @@
             margin: 0;
         }
     </style>
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style></head>
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><meta><meta><meta><meta><meta><meta></head>
 
 <body style="word-wrap: break-word;" onfocusout="parent.setEmailRange();">
-    <div id="divPnlMessage" hidden="hidden" class="alert alert-danger" style="font-family: undefined;">
+    <div id="divPnlMessage" hidden="hidden" class="alert alert-danger">
         <label id="lblMessage" style="font-size:16pt;">...</label>
     </div>
-    <div id="divPnlTools" style="font-family: undefined;">
+    <div id="divPnlTools" style="font-family:Segoe\000020UI,Tahoma,Arial;">
         <table class="toolbar">
             <tbody>
                 <tr>
@@ -325,12 +337,12 @@
             </tbody>
         </table>
     </div>
-    <div id="pnlSettings" style="font-family: undefined;">
+    <div id="pnlSettings" style="font-family: Segoe\000020UI,Tahoma,Arial;">
         <table id="tblSettings">
             <thead>
                 <tr style="background-color:white;">
                     <td colspan="2">
-                        <img src="../../webresources/ezt_logo_256x55.png">
+                        <img class="eztlogo" src="../../webresources/ezt_logosvg">
                         <button id="btnUpdateSettings" type="button" class="btn align-right" onclick="btnUpdateSettings_OnClick()">
                             Update Settings
                         </button>
@@ -364,8 +376,8 @@
 
     </div>
 
-    <div id="freeTrialSection" style="display: none; padding-left: 10px;  font-family: undefined;">
-        <p>
+    <div id="freeTrialSection" style="display: none; padding-left: 10px;">
+        <p class="freeTrial">
             <strong>Ready to get started?:</strong> Register for a free trial of EasyTerritory Enterprise by clicking the button below.<br><br>
             <button class="btn btn-success btn-lg " id="EztFreeTrial" onclick="window.open('http://www.easyterritory.com/register/', '_blank')">Free Trial</button><br><br> EasyTerritory Enterprise features include:
             <br> - Manage ZIP Code to territory alignments
@@ -387,6 +399,8 @@
             var strLatFields = EZT.Utilities.getEZTSetting("crmAdvFindLatFields");
             var strLonFields = EZT.Utilities.getEZTSetting("crmAdvFindLonFields");
             var eztEndpoint = EZT.Utilities.getEZTSetting("EZT Instance URL");
+            var eztUserName = EZT.Utilities.getEZTSetting("EZT Username");
+            var eztPassword = EZT.Utilities.getEZTSetting("EZT Password");
 
             if (strLatFields == "Forbidden" || strLonFields == "Forbidden" || eztEndpoint == "Forbidden") {
                 $("#divPnlTools").hide();
@@ -405,6 +419,12 @@
                 if (eztEndpoint == "NoSettingReturned") {
                     setDefaultValue("EZT Instance URL", "https://apps.easyterritory.com/GUID/APP");
                 }
+                if (eztUserName == "NoSettingReturned"){
+                    setDefaultValue("EZT Username", "username");
+                }
+                if (eztPassword == "NoSettingReturned"){
+                    setDefaultValue("EZT Password", "password");
+                }
 
                 // Retrieve the current settings
                 $.ajax({
@@ -422,6 +442,11 @@
                             var ezt_easyterritorysettingsId = results[i].ezt_easyterritorysettingsId;
                             var ezt_SettingName = results[i].ezt_SettingName;
                             var ezt_Setting = results[i].ezt_Setting;
+                            if(ezt_SettingName == 'EZT Password'){
+                                if(ezt_Setting != 'password'){
+                                    ezt_Setting = '[password was entered]'
+                                }
+                            }
                             var dtModifiedOn = results[i].ModifiedOn;
                             addSettingTableRow("divSettings", ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i.toString());
                         }
@@ -500,13 +525,12 @@
                 checkEztSettingsEntity
 
             ], function(err) {
-				if(err){ 
-					console.log('Error in async Waterfall that checks ezt_easyterritorysettings entity: ' + err);
-				}
+                if(err){ 
+                    console.log('Error in async Waterfall that checks ezt_easyterritorysettings entity: ' + err);
+                }
             });
         }
- 
-            //this checks the settings entity in the ezt_setting field and sees if it is a free trial.  If so, display the free trial message with link to EZT.
+
         function checkEztSettingsEntity(callback) {
 
             var xhttp = new XMLHttpRequest();
@@ -532,8 +556,8 @@
                     callback(null);
 
                 } else if(this.readyState == 400 || this.readyState == 404) {
-					console.log("Error in querying the ezt_easyterritorysettings entity")
-				}
+                    console.log("Error in querying the ezt_easyterritorysettings entity")
+                }
             };
 
             xhttp.onprogress = function() {
@@ -549,7 +573,7 @@
         window.onload = checkEztSettingsEntityWaterfall;
 
         page_OnLoad();
-		
+        
     </script>
 
 
