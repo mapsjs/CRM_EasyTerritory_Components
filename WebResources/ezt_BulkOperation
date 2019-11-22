@@ -8,6 +8,9 @@
 
         <!-- Latest compiled JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+        <!-- ezt custom css -->
+        <link rel="stylesheet" type="text/css" href="../../WebResources/ezt_webResourceStyles.css">
 
         <!-- Xrm.Page model -->
         <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
@@ -15,25 +18,28 @@
         <!-- javascript azync library-->
         <script src="../WebResources/ezt_async.js"></script>
 
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><meta></head>
-
-        
+        <meta></head>
+     
         <body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;">
-            <button onclick="ezt_getView()" class="btn btn-primary btn-lg" id="getViewEntity">Get View</button>
+
+            <div style="margin-top:5px; margin-left: 5px; margin-right: 5px">
+            <div><img class="eztlogo" src="../../webresources/ezt_logosvg"></div>
+            <button onclick="ezt_getView()" class="eztButtonText" id="getViewEntity"><img class="eztButtons1" src="../../webresources/ezt_systemview.png">Get View</button>
         
 
-            <button onclick="ezt_runJob()" class="btn btn-success btn-lg" id="runJob" style="visibility: hidden;">Bulk Execute Workflow</button>
-        <button onclick="ezt_stopJob()" class="btn btn-danger btn-lg" style="visibility: hidden;" id="stopJob">Cancel</button>
+            <button onclick="ezt_runJob()" class="eztButtonText" id="runJob" style="visibility: visible;" disabled=""><img class="eztButtons" src="../../webresources/ezt_startjob">Bulk Execute Workflow</button>
+        <button onclick="ezt_stopJob()" class="eztButtonText" style="visibility: visible;" id="stopJob" disabled=""><img class="eztButtons1" src="../../webresources/ezt_deactivate.png">Cancel</button>
 
-    
+
+     <div id="log" style="font-family: undefined;"></div>
 
         <!-- This is paragraph elements for the output of script -->
-        <p style="color:red; margin-left:10px; visibility: hidden;" id="cancel"> </p>
+        <p style="color:red; margin-left:10px; margin-top: 2px; visibility: hidden;" id="cancel"> </p>
         <p style="margin-left:10px; visibility: hidden;" id="ezt"> </p>
 
         <p style="margin-left:10px; visibility: hidden;" id="errors">Log: </p>
         <p style="margin-left:10px; visibility: visible;" id="divCheckList"> </p>
-
+    </div>
     <script>
     
         (function() {
@@ -98,7 +104,7 @@
             
                 // hide, enable elements
                 {
-                    document.getElementById("stopJob").style.visibility = "visible";
+                    document.getElementById("stopJob").disabled = false;
                 } {
                     document.getElementById("errors").style.visibility = "visible";
                 } {
@@ -107,6 +113,8 @@
                     document.getElementById("ezt").style.visibility = "visible";
                 }
                 document.getElementById("cancel").innerHTML = ("");
+            
+                
 
                 
 
@@ -417,6 +425,7 @@
             function getSystemViews(entity, entityid, waterfallCallback){
 
                 document.getElementById("ezt").style.visibility = "visible";
+                document.getElementById("runJob").disabled = false;
 
                 var myDoc = document.getElementById("ezt");
 
@@ -579,6 +588,7 @@
             window.ezt_getView = getCrmView;
         })();
     </script>
+
 
 
 
