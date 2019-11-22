@@ -1,0 +1,1129 @@
+<html><head>
+    <!-- javascript azync library-->
+    <script src="../WebResources/ezt_async.js"></script>
+    <!-- ezt custom css -->
+    <link rel="stylesheet" type="text/css" href="../../WebResources/ezt_webResourceStyles.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- javascript azync library-->
+    <script src="../WebResources/ezt_async.js"></script>
+    <!-- Xrm.Page model -->
+    <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
+<meta><meta><meta><meta><meta><meta><meta></head>
+
+<body style="overflow-wrap: break-word;" onfocusout="parent.setEmailRange();">
+    <div><img class="eztlogo" src="../../webresources/ezt_logosvg"></div>
+    <button class="eztButtonText" id="eztButtonRun"><img class="eztButtons" src="../../webresources/ezt_startjob">Run Territory Sync </button>
+    <button class="eztButtonText" id="eztButtonCancel"><img class="eztButtons1" src="../../webresources/ezt_deactivate.png">Cancel </button>
+    <div id="log" style="font-family: undefined;"></div>
+    <div id="results">
+        <p><strong>Results:</strong></p>
+    </div>
+    <div id="resultsProccessing">
+        <p class="processingDots"></p>
+    </div>
+    <div id="resultsCreated">
+        <p></p>
+    </div>
+    <div id="resultsUpdated">
+        <p></p>
+    </div>
+    <div id="resultsDeleted">
+        <p></p>
+    </div>
+    <div id="errorTitle">
+        <p><strong>Error log:</strong></p>
+    </div>
+    <div id="errors">
+        <p></p>
+    </div>
+    <script>
+    (function() {
+
+        var url;
+        var moreRecords;
+        var crmTerrRecordsArray;
+
+        var createdTerrNum;
+        var updatedTerrNum;
+        var deletedTerrNum;
+        var cancelClicked;
+        var crmUrl = parent.Xrm.Page.context.getClientUrl();
+
+        var errorMess;
+        var scriptErrors;
+
+        // main entry point----------
+        function runTerritorySync() {
+
+            $("#eztButtonRun").prop("disabled", true);
+
+            createdTerrNum = 0;
+            updatedTerrNum = 0;
+            deletedTerrNum = 0;
+            errorMess = "";
+            scriptErrors = false;
+
+            crmTerrRecordsArray = [];
+
+            $("#resultsProccessing p:first-child").text("Processing...").css("color", "black");
+            $("#resultsCreated p:first-child").text("");
+            $("#resultsUpdated p:first-child").text("");
+            $("#resultsDeleted p:first-child").text("");
+            $("#errors p:first-child").text("");
+
+            moreRecords = true;
+            cancelClicked = false;
+
+            async.waterfall([
+
+                getEztUrl,
+                eztLogin,
+                eztProjectMarkup,
+                getTargetTerritoryEntityInfo,
+                getRelEntityInfo,
+                deleteRecords,
+                createUpdateRecords
+
+            ], function(err) {
+
+                $("#eztButtonRun").prop("disabled", false);
+
+                if (createdTerrNum == 0 && updatedTerrNum == 0 && deletedTerrNum == 0 && !cancelClicked && !err && !scriptErrors) {
+
+                    $("#resultsProccessing p:first-child").text("Territories already insync!");
+                } else if (cancelClicked) {
+
+                    $("#resultsProccessing p:first-child").text("Canceled!").css("color", "red");
+                } else if (err) {
+
+                    $("#resultsProccessing p:first-child").text(err).css("color", "red");
+
+                } else {
+
+                    if (scriptErrors) {
+                        $("#resultsProccessing p:first-child").text("Job complete... with errors");
+                    } else {
+                        $("#resultsProccessing p:first-child").text("Job complete. Territories insync!");
+                    }
+
+                    $("#resultsCreated p:first-child").text("Created Territories: " + createdTerrNum);
+                    $("#resultsUpdated p:first-child").text("Updated Territories: " + updatedTerrNum);
+                    $("#resultsDeleted p:first-child").text("Deleted Territories: " + deletedTerrNum);
+                }
+
+            });
+
+        }
+
+        // get ezt url and creds from dynamics configuration entity
+        function getEztUrl(cBack) {
+
+            $.ajax({
+                url: crmUrl + "/api/data/v9.0/ezt_easyterritorysettingses",
+                method: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function() {
+
+                },
+                success: function(data) {
+
+                  try{
+
+                    var url;
+                    var uN;
+                    var pW;
+
+                    if (data.value) {
+
+                        data.value.forEach((d) => {
+
+                            if (d.ezt_settingname == "EZT Instance URL") {
+
+                               
+                                url = d.ezt_setting;
+                              
+
+                            } else if (d.ezt_settingname == "EZT Username") {
+
+                                uN = d.ezt_setting;
+
+                            } else if (d.ezt_settingname == "EZT Password") {
+
+                                pW = d.ezt_setting;
+
+                            }
+
+                        });
+
+                        cBack(null, url, uN, pW);
+
+                    } else {
+
+                        cBack("Error in calling EasyTerritory solution settings. Url: " + crmUrl + "/api/data/v9.0/ezt_easyterritorysettingses");
+                    }
+
+                  } catch(err){
+
+                    cBack("Error in setting variables in function getEztUrl(). Error: " + err);
+                  } 
+                },
+                error: function(err) {
+
+                    cBack("Error in calling EasyTerritory solution settings. Url: " + crmUrl + "/api/data/v9.0/ezt_easyterritorysettingses" + "Error Message: " + err);
+                }
+
+            });
+
+        }
+
+        // get oi token from login endpoint
+        function eztLogin(eztUrl, uN, pW, cBack) {
+
+
+            $.ajax({
+                url: eztUrl + "/REST/Login/Login",
+                method: "POST",
+                data: JSON.stringify({ username: uN, password: pW }),
+                contentType: "application/json",
+                beforeSend: function() {
+                   
+                    $("#resultsProccessing p:first-child").text("Getting territory definitions from EasyTerritory...");
+                },
+                success: function(data, textStatus, jqXHR) {
+
+                    cBack(null, data.token, eztUrl);
+
+                },
+                error: function(jqXHR, textStatus, error) {
+
+                    if (jqXHR.status != 200) {
+                        
+                        cBack("Error in calling EasyTerritory Endpoint. Url: " + eztUrl + "/REST/Login/Login" + " Error Message: " + jqXHR.status + '- ' + error);
+                    }
+                }
+
+            });
+        }
+
+        // get project markup polygon territory definitions
+        function eztProjectMarkup(token, eztUrl, cBack) {
+
+            var projectId = window.parent.Xrm.Page.getAttribute('ezt_easyterritoryprojectid').getValue();
+            
+            var eztProjectMarkupPolygonEndpoint = eztUrl + "/REST/ProjectMarkupPolygon/" + projectId + "?omitWkt=true&omitMetadata=true&oiToken=" + token;
+
+            $.ajax({
+                url: eztProjectMarkupPolygonEndpoint,
+                method: "GET", 
+                contentType: "application/json",
+                crossDomain: true,
+                beforeSend: function() {
+
+                },
+                xhrFields: {
+
+                    withCredentials: true
+                },
+                success: function(result) {
+
+                    if (result.length != 0) {
+                        
+                        cBack(null, result);
+
+                    } else {
+
+
+                        cBack("Error: EasyTerritory Project '" + projectId + "'' contatins no territory definitions. Please Check the EasyTerritory project Id guid.");
+                    }
+                },
+                error: function(jqXHR, textStatus, error) {
+
+                    if (jqXHR.status != 200) {
+
+                        cBack("Error in calling EasyTerritory Url. URL: '" + eztProjectMarkupPolygonEndpoint + "' . Error: " + jqXHR.status);
+                    }
+
+                }
+            });
+        }
+
+        // get target entity definitions
+        function getTargetTerritoryEntityInfo(eztTerrs, wcBack) {
+
+            var targetTerritoryName = window.parent.Xrm.Page.getAttribute('ezt_territoryentityname').getValue();
+            var markupIdField = window.parent.Xrm.Page.getAttribute('ezt_eztkey').getValue();
+
+            $.ajax({
+                url: crmUrl + "/api/data/v9.0/EntityDefinitions(LogicalName='" + targetTerritoryName + "')?$select=LogicalName,LogicalCollectionName,PrimaryIdAttribute,PrimaryNameAttribute&$expand=Attributes($select=LogicalName)",
+                method: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                indexValue: { eztTerrs: eztTerrs },
+                beforeSend: function() {
+
+                },
+                success: function(data) {
+
+                  try{  
+                    
+                    // store territory defintions in object this object will pass through all functions
+                    var targetTerrDefs = new Object();
+
+                    targetTerrDefs.terrLogicalName = targetTerritoryName;
+                    targetTerrDefs.terrPrimaryIdField = data.PrimaryIdAttribute;
+                    targetTerrDefs.terrLogicalColName = data.LogicalCollectionName;
+                    targetTerrDefs.terrPrimaryNameField = data.PrimaryNameAttribute;
+                    targetTerrDefs.terrMarkupIdField = '';
+
+                    data.Attributes.forEach(function(d) {
+
+                        if (d.LogicalName == markupIdField) {
+
+                            targetTerrDefs.terrMarkupIdField = d.LogicalName;
+                        }
+
+                    });
+
+                    if (!targetTerrDefs.terrMarkupIdField) {
+
+                        wcBack("Error in setting the markup id field. The Territory EZT Key Field Name '" + markupIdField + "' does not match what is in the territory Entity Definitions");
+
+                    } else {
+
+                        
+                        wcBack(null, this.indexValue.eztTerrs, targetTerrDefs);
+                    }
+                  } catch(err){
+
+                    wcBack("Error in setting object variable in function getTargetTerritoryEntityInfo().  Error " + err);
+
+                  }
+                },
+                error: function(err) {
+
+                    wcBack("Error in calling '" + targetTerritoryName + "' territory definition api endpoint. Please check to make sure territory name is correct");
+                }
+            });
+
+        }
+
+        // lookup record first, then either create or update territory record
+        function createUpdateRecords(terrs, crmTerrDefs, cBack) {
+
+            try{
+                // compare ezt territory records with crm territory records 
+                var crmMarkupIdField = crmTerrDefs.terrMarkupIdField;
+                var crmPrimeNameField = crmTerrDefs.terrPrimaryNameField;
+                var crmPrimeIdField = crmTerrDefs.terrPrimaryIdField;
+                var recordsToCrud = [];
+
+                terrs.filter(function(row) {
+
+                      var rec = crmTerrRecordsArray.find(function(row2) {
+
+                            if(row.markupId == row2[crmMarkupIdField] && row.tag != row2[crmPrimeNameField]){
+
+                                row['crud'] = 'name';
+                                row['crmRecordId'] = row2[crmPrimeIdField];
+                                recordsToCrud.push(row);
+
+                            }else if(row.tag == row2[crmPrimeNameField] && row2[crmMarkupIdField] == null){
+
+                                row['crud'] = 'markupId';
+                                row['crmRecordId'] = row2[crmPrimeIdField];
+                                recordsToCrud.push(row);
+                            }
+
+                            return row.markupId == row2[crmMarkupIdField] || row.tag == row2[crmPrimeNameField];
+
+                      });
+
+                      if(rec == undefined){
+
+                        row['crud'] = 'create';
+                        recordsToCrud.push(row);
+                      }
+
+                  });
+
+
+            }catch(error){
+
+                errorMessager("Error in comparing territory records in updateCreate function. No records updated or created in CRM - "+ error.message);
+                
+                // set to empty array so updateRecord and createRecord functions will not run
+                recordsToCrud = [];
+            }
+
+            async.eachLimit(recordsToCrud, 5, function(recCrud, eachCallback) {
+
+                if (cancelClicked) {
+
+                    eachCallback('Canceled!');
+
+                } else if (recCrud.crud == 'name')  {
+
+                    updateRecord(recCrud.crmRecordId, recCrud.tag, crmPrimeNameField, crmTerrDefs.terrLogicalColName, eachCallback);
+                   
+                } else if (recCrud.crud == 'markupId'){
+
+                    updateRecord(recCrud.crmRecordId, recCrud.markupId, crmMarkupIdField, crmTerrDefs.terrLogicalColName, eachCallback);
+
+                } else if (recCrud.crud == 'create'){
+
+                    createRec(recCrud, crmTerrDefs, eachCallback);
+                }
+
+            }, function(err) {
+
+                if(err && err != 'Canceled!'){
+
+                    errorMessager("Error in function updateCreate eachlimit function - '"+ err);
+                }
+                cBack(null, err);
+
+            });
+        }
+
+        // create a new territory record in dynamics
+        function createRec(terr, crmTerrProp, wcBack) {
+
+            $.ajax({
+                url: crmUrl + "/api/data/v9.0/" + crmTerrProp.terrLogicalColName,
+                method: "POST",
+                contentType: "application/json",
+                indexValue: { markupId: terr.markupId, tag: terr.tag},
+                data: JSON.stringify({
+                    [crmTerrProp.terrPrimaryNameField]: terr.tag,
+                    [crmTerrProp.terrMarkupIdField]: terr.markupId
+                }),
+                dataType: "json",
+                beforeSend: function() {
+                    
+
+                },
+                success: function(data) {
+
+                    $("#resultsProccessing p:first-child").text("Creating records...").css("color", "black");
+                    
+                    createdTerrNum++;
+                    $("#resultsCreated p:first-child").text("Created Territories: " + createdTerrNum);
+
+                    wcBack();
+                },
+                error: function(jqXHR, textStatus, error) {
+
+
+                    errorMessager("Error in creating new territory record. EZT territory name: '"+ this.indexValue.tag +"', EZT markupid: '"+ this.indexValue.tag +"'. Error: " + jqXHR.status + " " + error);
+                    wcBack();
+                }
+            });
+
+
+        }
+
+        // update record in dynamics
+        function updateRecord(recordId, valueToChange, nameField, terrEntityName, wcBack) {
+            
+
+            $.ajax({
+                url: crmUrl + "/api/data/v9.0/" + terrEntityName + "(" + recordId + ")/" + nameField,
+                method: "PUT",
+                contentType: "application/json",
+                data: JSON.stringify({ value: valueToChange }),
+                indexValue: { thisValue: valueToChange},
+                dataType: "json",
+                beforeSend: function() {
+
+                },
+                success: function(data) {
+
+                    $("#resultsProccessing p:first-child").text("Updating records...").css("color", "black");
+
+                    updatedTerrNum++;
+                    $("#resultsUpdated p:first-child").text("Updated Territories: " + updatedTerrNum);
+                    wcBack(null);
+                },
+                error: function(jqXHR, textStatus, error) {
+
+                    errorMessager("Error in updating territory record '"+ this.indexValue.thisValue +"'. Error: " + jqXHR.status + " " + error);
+
+                    wcBack();
+                }
+            });
+
+        }
+
+        // entry point for identifying territory records not in ezt, then removing relationships with other entities, lastly deleting territory record itself
+        // this is a whilst loop incase there are more than 5,000 territories and territories are paged
+        function deleteRecords(terr, crmTerrDefs, relEntityInfoArray, cBack) {
+
+            url = crmUrl + "/api/data/v9.0/" + crmTerrDefs.terrLogicalColName + "?$select=" + crmTerrDefs.terrPrimaryIdField + "," + crmTerrDefs.terrMarkupIdField + "," + crmTerrDefs.terrPrimaryNameField;
+
+            async.whilst(
+                function() { return moreRecords },
+                function(cb) {
+
+                    $("#resultsProccessing p:first-child").text("Comparing territory records...");
+
+                    processTerrsToDeleteWaterFall(terr, crmTerrDefs, relEntityInfoArray, cb);
+
+                },
+                function(err) {
+
+                    if(err){
+
+                      cBack(err);
+
+                    }else{
+
+                      cBack(null, terr, crmTerrDefs);
+                    }
+                }
+            );
+        }
+
+        // multiple calls to dynamics endpoints in the process of deleting terr records
+        function processTerrsToDeleteWaterFall(terr, crmTerrDefs, relEntityInfoArray, cb) {
+
+            async.waterfall([
+
+                async.apply(getTerrRecords, terr, crmTerrDefs, relEntityInfoArray),
+                    compareTerrRecords,
+                    getRelationshipRecordsToTerr,
+                    removeRelationships,
+                    deleteTerrRecEach
+
+            ], function(err) {
+
+                if (err) {
+
+                    cb(err);
+
+                }else{
+
+                 cb();
+              }
+
+            });
+
+        }
+
+        // get territories in target entity
+        function getTerrRecords(terr, crmTerrDefs, relEntityInfoArray, callb) {
+
+            $.ajax({
+                url: url,
+                method: "GET",
+                headers: { "Prefer": "odata.maxpagesize=5000", "OData-MaxVersion": "4.0", "OData-Version": "4.0" },
+                contentType: "application/json",
+                dataType: "json",
+                indexValue: { eztTerr: terr, crmTerrDef: crmTerrDefs, relatedEntityInfoArray: relEntityInfoArray },
+                beforeSend: function(xhr) {
+
+                },
+                success: function(data) {
+
+                    if (typeof data['@odata.nextLink'] != 'undefined') {
+                        url = data['@odata.nextLink'];
+
+                    } else if (typeof data['@odata.nextLink'] == 'undefined' || cancelClicked) {
+                        moreRecords = false;
+                    }
+
+                    // push crm terr records into global variable array
+                    // to be evaluated when updating and creating records in crm
+                    //crmTerrRecordsArray.push(data.value);
+                    data.value.forEach(function(d){crmTerrRecordsArray.push(d)});
+
+                    callb(null, data.value, this.indexValue.eztTerr, this.indexValue.crmTerrDef, this.indexValue.relatedEntityInfoArray);
+                },
+                error: function(jqXHR, textStatus, error) {
+
+                    callb("Call failed to get crm territory records. Error: " + jqXHR.status);
+                    moreRecords = false;
+
+                }
+            });
+
+        }
+
+        // compare territory records in dynamics against ezt territories
+        function compareTerrRecords(crmRecs, eztRecs, crmTerrDef, crmRelEntityInfoArray, cb) {
+
+            try{
+              var recordsToEdit = new Object();
+
+              var crmMarkupIdField = crmTerrDef.terrMarkupIdField;
+
+              var recordsToDelete = crmRecs.filter(function(row) {
+
+                  var del = eztRecs.find(function(row2) {
+
+                      return row2.markupId == row[crmMarkupIdField] || row[crmMarkupIdField] == null;
+
+                  });
+
+                  return del == undefined;
+
+              });
+
+
+              // hold results in an object records
+              // records from ezt in one property
+              // records in dynamics to delete in another
+              recordsToEdit.eztRecs = eztRecs;
+              recordsToEdit.recsToDelete = recordsToDelete;
+
+              cb(null, recordsToEdit, crmTerrDef, crmRelEntityInfoArray);
+
+            }catch(err){
+
+              cb("Error occured in function compareTerrRecords- " + err);
+
+            }
+        }
+
+        // get One to Many relationships with target territory entity
+        function getRelationshipDefsOne2Many(terr, cbk) {
+
+            $.ajax({
+                url: crmUrl + "/api/data/v9.0/EntityDefinitions(LogicalName='" + terr + "')/OneToManyRelationships?$select=SchemaName,ReferencingEntity",
+                method: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function(xhr) {
+                    
+                },
+                success: function(data) {
+
+
+                    // push all the relationship entity definitions into array
+                    // pass the array to the 'getRelatisonshipDefsMany2Many' function
+                    var terrDefObjArr = [];
+
+                    try{
+                      //loop through and push the schema name and referencing entity into an object
+                      data.value.forEach(function(d) {
+
+                          var terrDefObj = new Object();
+                          terrDefObj.schemaName = d.SchemaName;
+                          terrDefObj.referencingEntity = d.ReferencingEntity;
+                          terrDefObjArr.push(terrDefObj);
+
+                      });
+
+                    }catch(err){
+
+                      errorMessager("Error occured in pushing 'one to many' territory relationships into an array- " + err);
+
+                    }finally{
+
+                      cbk(null, terr, terrDefObjArr);
+                    }
+
+                },
+                error: function(jqXHR, textStatus, error) {
+
+                    //if call fails create relationship entity definition array
+                    var terrDefObjArr = [];
+
+                    errorMessager("Error in calling the 'one to many' entity relationship defintions. Error: " + jqXHR.status);
+
+                    cbk(null, terr, terrDefObjArr);
+                }
+            });
+
+        }
+
+        // get Many to Many relationships with target territory entity
+        function getRelationshipDefsMany2Many(terr, terrDefObjArr, cbk) {
+
+            $.ajax({
+                url: crmUrl + "/api/data/v9.0/EntityDefinitions(LogicalName='" + terr + "')/ManyToManyRelationships?$select=Entity1LogicalName,Entity2LogicalName,SchemaName",
+                method: "GET",
+                contentType: "application/json",
+                dataType: "json",
+                indexValue: { territoryName: terr, terrDefObjArray: terrDefObjArr },
+                beforeSend: function(xhr) {
+                    
+                },
+                success: function(data) {
+
+                    try{
+
+                      var relatedEntityName = this.indexValue.territoryName;
+
+                      var terrDefObjArray = this.indexValue.terrDefObjArray;
+
+                      data.value.forEach(function(d) {
+
+                          var terrDefObj = new Object();
+
+                          terrDefObj.schemaName = d.SchemaName;
+
+                          if (d.Entity1LogicalName != relatedEntityName) {
+
+                              terrDefObj.referencingEntity = d.Entity1LogicalName;
+
+                          } else if (d.Entity2LogicalName != relatedEntityName) {
+
+                              terrDefObj.referencingEntity = d.Entity2LogicalName;
+
+                          }
+
+                          terrDefObjArray.push(terrDefObj);
+
+                      });
+
+                    }catch(err){
+
+
+                        errorMessager("Error occured in pushing 'many to many' territory relationships into an array- " + err);
+
+                    } finally{ 
+
+                      cbk(null, terrDefObjArray);
+
+                    }
+
+                },
+                error: function(jqXHR, textStatus, error) {
+
+
+                    errorMessager("Error in calling the 'many to many' entity relationship defintions. Error: " + jqXHR.status);
+
+
+                    cbk(null, this.indexValue.terrDefObjArray);
+                }
+            });
+        }
+
+        // after getting the project markup polygon territories
+        // get the info from entities in relationship with target territory
+        function getRelEntityInfo(eztTerrs, crmTerrDefs, cb) {
+
+            async.waterfall([
+
+                async.apply(getRelationshipDefsOne2Many, crmTerrDefs.terrLogicalName),
+
+                    getRelationshipDefsMany2Many,
+
+            ], function(err, defs) {
+
+                // get the primary ids from all records associated with a territory record adn hold in array
+                var relEntityInfoArray = [];
+
+                async.eachLimit(defs, 10, function(def, cbk) {
+
+                    $.ajax({
+                        url: crmUrl + "/api/data/v9.0/EntityDefinitions(LogicalName='" + def.referencingEntity + "')?$select=PrimaryIdAttribute",
+                        method: "GET",
+                        contentType: "application/json",
+                        dataType: "json",
+                        indexValue: { relEntityLogicalName: def.referencingEntity, schemaName: def.schemaName },
+                        beforeSend: function(xhr) {
+                           
+                            $("#resultsProccessing p:first-child").text("Processing...");
+                        },
+                        success: function(data) {
+
+                            try{
+
+                              var relEntDef = new Object();
+                              relEntDef.entityName = this.indexValue.relEntityLogicalName;
+                              relEntDef.schemaName = this.indexValue.schemaName;
+                              relEntDef.primaryId = data.PrimaryIdAttribute;
+                              relEntityInfoArray.push(relEntDef);
+
+                            }catch(err){
+
+                              errorMessager("Error in pushing record id's from related entity '" + def.referencingEntity + "' into array- " + err);
+
+                            }finally{
+                              
+                               cbk();
+                            
+                            }
+
+                        },
+                        error: function(jqXHR, textStatus, error) {
+
+                            errorMessager("Error in calling the entity definitions api. Not able to get the primaryId for related entities '" + def.referencingEntity + "'. Error: " + jqXHR.status);
+
+                              cbk();
+
+                        }
+                    });
+
+                }, function(err) {
+                    
+                      cb(null, eztTerrs, crmTerrDefs, relEntityInfoArray);
+                    
+                });
+
+            });
+
+        }
+
+        function getRelationshipRecordsToTerr(recs, crmTerrDef, relRecs, cback) {
+
+            var removeRelationshipsArray = new Array();
+
+            // looping through each territory record labeled for deletion, 10 at a time
+            async.eachLimit(recs.recsToDelete, 5, function(rec, callB) {
+
+                // for every territory, looping through each relationship and grabbing related records
+                // pushing related records into removeRelationshipsArray              
+                async.eachLimit(relRecs, 5, function(relRec, callb) {
+
+                    if(cancelClicked){
+
+                        callb('Canceled!');
+
+                    } else{
+
+                        var moreRelRecords = true;
+
+                        var url2 = crmUrl + '/api/data/v9.0/' + crmTerrDef.terrLogicalColName + '(' + rec[crmTerrDef.terrPrimaryIdField] + ')/' + relRec.schemaName + '?$select=' + relRec.primaryId;
+
+                        // paging call to get related records incase related records is more than 5,0000
+                        async.whilst(
+                            function() { return moreRelRecords },
+                            function(cb) {
+
+                                $.ajax({
+                                    url: url2,
+                                    method: "GET",
+                                    headers: {
+                                        "Prefer": "odata.maxpagesize=5000",
+                                        "OData-MaxVersion": "4.0",
+                                        "OData-Version": "4.0"
+                                    },
+                                    contentType: "application/json",
+                                    dataType: "json",
+                                    indexValue: { terrId: rec[crmTerrDef.terrPrimaryIdField], relEntity: relRec.entityName, relEntityId: relRec.primaryId, schemaName: relRec.schemaName, crmTerrDef: crmTerrDef },
+                                    beforeSend: function(xhr) {
+
+                                        $("#resultsProccessing p:first-child").text("Getting relationships...");
+
+                                    },
+                                    success: function(data) {
+
+                                        if (data.value.length != 0) {
+
+                                            if (typeof data['@odata.nextLink'] != 'undefined') {
+
+                                                url2 = data['@odata.nextLink'];
+
+
+                                            } else if (typeof data['@odata.nextLink'] == 'undefined' || cancelClicked) {
+
+                                                moreRelRecords = false;
+
+                                            }
+
+                                            try{
+
+                                              var terrID = this.indexValue.terrId;
+                                              var primeTerrField = crmTerrDef.terrPrimaryIdField;
+                                              var relatedRecId = this.indexValue.relEntityId;
+
+                                              // putting related record information in an object and pushing object into removeRelatiosHipsArray
+                                              data.value.forEach(function(e) {
+                                                  e.targetTerrRecId = terrID;
+                                                  e.schemaName = relRec.schemaName;
+                                                  e.relatedRecordPrimaryId = e[relatedRecId];
+                                                  removeRelationshipsArray.push(e);
+                                              });
+
+                                            } catch(err){
+
+                                              errorMessager("Error in putting related record information for relationship '"+ this.indexValue.schemaName +"'- "+ err);
+
+                                            }finally{
+
+                                              cb();
+                                            }
+
+                                        } else {
+
+                                            moreRelRecords = false;
+                                            cb();
+                                        }
+                                    },
+                                    error: function(jqXHR, textStatus, error) {
+
+                                        errorMessager("Call failed to get related record information for relationship '"+ this.indexValue.schemaName +"'.Error: "+ jqXHR.status);
+                                        moreRelRecords = false;
+                                        cb();
+                                    }
+                                });
+
+
+                            },
+                            function(err) {
+
+                                if(err && err != 'Canceled!'){
+
+                                  errorMessager("Error in 'getRelationshipRecordsToTer' whilst function - " + err.message);
+                                }
+
+                                callb();
+
+                            });
+                    }    
+
+
+                }, function(err) {
+
+                    if(err && err != 'Canceled!'){
+
+                      errorMessager("Error in 'getRelationshipRecordsToTerr' function eachLimit function- " + err.message);
+                    }
+
+                    callB();
+
+                });
+
+            }, function(err) {
+
+                if(err && err != 'Canceled!'){
+
+                  errorMessager("Error in 'getRelationshipRecordsToTerr' function eachLimit function- " + err.message);
+                }
+                cback(null, removeRelationshipsArray, recs, crmTerrDef);
+
+            });
+        }
+
+        function removeRelationships(removeRelationshipsArray, recs, crmTerrDef, cb) {
+
+            // divide the removeRelationshipsArray into bulks of 500 
+            var bulk = chunkBulk(removeRelationshipsArray);
+
+            var counting = 0;
+
+            // iterate through the bulks
+            async.eachLimit(bulk, 5, function(b, eachCB) {
+
+                counting++;
+
+                var uniqueId = Math.floor(Math.random() * 90000) + 100000;
+
+                if (!cancelClicked) {
+
+                    if (b.length < 5) {
+
+                        removeRelationshipsEach(b, recs, crmTerrDef, eachCB);
+
+                    } else {
+
+                        $("#resultsProccessing p:first-child").text("Removing relationships with territory entity. Processing " + counting + " of " + bulk.length + " bulks...");
+                        removeRelationshipInBulk(b, recs, crmTerrDef, uniqueId, eachCB);
+
+                    }
+                }
+
+            }, function(err) {
+
+                if(err && err != 'Canceled!'){
+
+                  errorMessager("Error in removeRelationships eachLimit function- " + err.message);
+                }
+
+                cb(null, recs, crmTerrDef);
+
+            });
+
+        }
+
+        function chunkBulk(removeRelArray) {
+
+            const chunked = [];
+
+            let index = 0;
+
+            while (index < removeRelArray.length) {
+
+                chunked.push(removeRelArray.slice(index, 500 + index));
+                index += 500;
+            }
+
+            return chunked;
+        }
+
+
+        function removeRelationshipInBulk(removeRelationshipsArray, recs, crmTerrDef, uniqueId, cb) {
+
+            var data = [];
+            data.push('--batch_AAA' + uniqueId);
+            data.push('Content-Type: multipart/mixed;boundary=changeset_BBB' + uniqueId);
+            data.push('');
+            var id = 0;
+
+            for (var i = 0; i < removeRelationshipsArray.length; i++) {
+
+                data.push('--changeset_BBB' + uniqueId);
+                data.push('Content-Type:application/http');
+                data.push('Content-Transfer-Encoding:binary');
+                id++;
+                data.push('Content-ID:' + id);
+
+                data.push('');
+                data.push('DELETE ' + crmUrl + '/api/data/v9.0/' + crmTerrDef.terrLogicalColName + '(' + removeRelationshipsArray[i].targetTerrRecId + ')/' + removeRelationshipsArray[i].schemaName + '(' + removeRelationshipsArray[i].relatedRecordPrimaryId + ')/$ref HTTP/1.1');
+
+                data.push('Content-Type:application/json;type=entry');
+                data.push('');
+                data.push('{}');
+            }
+
+            data.push('--changeset_BBB' + uniqueId + '--');
+            //end of batch
+            data.push('--batch_AAA' + uniqueId + '--');
+
+            var payload = data.join('\r\n');
+            var contentTypeStr = 'multipart/mixed;boundary=batch_AAA' + uniqueId;
+            $.ajax({
+                method: 'POST',
+                url: crmUrl + '/api/data/v9.0/$batch',
+                headers: {
+                    'Content-Type': contentTypeStr,
+                    'Accept': 'application/json',
+                    'Odata-MaxVersion': '4.0',
+                    'Odata-Version': '4.0'
+                },
+                data: payload,
+                async: true,
+                success: function(data, textStatus, xhr) {
+
+                },
+                error: function(xhr, textStatus, errorThrown) {
+
+                    errorMessager("Call fail to bulk remove territory relationships. Error:" + xhr.status);
+
+                },
+                complete: function(data, textStatus, xhr) {
+
+                    cb();
+                }
+            });
+
+        }
+
+        function removeRelationshipsEach(relationshipArr, recs, crmTerrDef, eachCallBack) {
+
+
+            async.eachLimit(relationshipArr, 5, function(relArr, CB) {
+
+                $.ajax({
+                    url: crmUrl + '/api/data/v9.0/' + crmTerrDef.terrLogicalColName + '(' + relArr.targetTerrRecId + ')/' + relArr.schemaName + '(' + relArr.relatedRecordPrimaryId + ')/$ref',
+                    indexValue: {relArr},
+                    method: "DELETE",
+                    contentType: "application/json",
+                    beforeSend: function(xhr) {
+
+                    },
+                    success: function(data) {
+
+                        CB();
+
+                    },
+                    error: function(jqXHR, textStatus, err) {
+
+                        errorMessager("Call failed to remove territory relationship '"+ this.indexValue.schemaName +"' with relationship record id '"+ this.indexValue.relatedRecordPrimaryId +"'");
+
+                        CB();
+                    }
+                });
+
+
+            }, function(err) {
+
+                if(err && err != 'Canceled!'){
+
+                  errorMessager("Error in removeRelationshipsEach function- " + err.message);
+                }
+                eachCallBack();
+            });
+
+
+        }
+
+        function deleteTerrRecEach(recs, crmTerrDef, cb) {
+
+            async.eachLimit(recs.recsToDelete, 5, function(rec, callB) {
+
+                if (cancelClicked) {
+
+                    callB('Canceled!');
+
+                } else {
+
+                    $.ajax({
+                        url: crmUrl + '/api/data/v9.0/' + crmTerrDef.terrLogicalColName + '(' + rec[crmTerrDef.terrPrimaryIdField] + ')',
+                        method: "DELETE",
+                        contentType: "application/json",
+                        beforeSend: function(xhr) {
+
+                        },
+                        success: function(data) {
+
+                            $("#resultsProccessing p:first-child").text("Deleting territory records...").css("color", "black");
+                            
+                            deletedTerrNum++;
+
+                            $("#resultsDeleted p:first-child").text("Deleted Territories: " + deletedTerrNum);
+
+                            callB();
+
+                        },
+                        error: function(jqXHR, textStatus, error) {
+
+                            errorMessager('Could not delete territory record "' + rec[crmTerrDef.terrPrimaryNameField] + '" with id "' + rec[crmTerrDef.terrPrimaryIdField] + '". Error: ' + jqXHR.status + '- ' + jqXHR.responseJSON.ExceptionMessage);
+
+                            callB();
+                        }
+                    });
+                }
+
+            }, function(err) {
+
+                if(err && err != 'Canceled!'){
+
+                  errorMessager("Error in 'deleteTerrRecEach' function " + err.message);
+                }
+                cb(null);
+
+            });
+
+        }
+
+        function errorMessager(errorMessage){
+                   
+          errorMess += errorMessage + "<br />";
+
+          $("#errors p:first-child").html(errorMess).css("color", "red");
+          scriptErrors = true;
+
+        }
+
+        function stopJob() {
+
+            moreRecords = false;
+            moreRelRecords = false;
+            cancelClicked = true;
+            $("#resultsProccessing p:first-child").text("Canceled!").css("color", "red");
+            $("#eztButtonRun").prop("disabled", false);
+        }
+
+        $("#eztButtonCancel").on('click', function() { stopJob(); });
+        $("#eztButtonRun").on('click', function() { runTerritorySync(); });
+
+    })();
+    </script>
+
+
+</body></html>
