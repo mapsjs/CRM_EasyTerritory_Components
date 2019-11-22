@@ -1,0 +1,88 @@
+.eztButtonText {
+
+     font-family: Segoe\000020UI,Tahoma,Arial; 
+     font-size: 12px; 
+     text-transform: uppercase; 
+     font-weight: normal;
+     background-color: #FFFFFF;
+     text-shadow:none;
+     border:none;
+     box-shadow:none;
+     height: 32px;
+     padding-top: 2px;
+     padding-bottom: 1px;
+     padding-left: 1px;
+ 
+}
+
+.eztButtonText:hover {
+   
+     background-color: #E7EFF7;
+     border-color: #E7EFF7;
+}
+
+img.eztButtons{
+
+     float: left;
+     margin-right: 5px;
+     margin-left: 5px; 
+     width: 16px;
+     height: 16px;
+
+}
+
+img.eztButtons1{
+
+     float: left;
+     margin-top: 1px;
+     margin-right: 5px;
+     margin-left: 5px;
+     width: 16px;
+     height: 16px;
+
+}
+
+img.eztlogo{
+     
+    max-width: 250px;
+    max-height: 400px;
+
+}
+
+#log {
+     
+     margin-top 1px;
+     background-color: #d3d3d3;
+     height: 5px;
+     weight: 50px;
+     margin-top: 8px;
+
+}
+
+p {
+
+     font-family: Segoe\000020UI,Tahoma,Arial; 
+     font-size: 12px; 
+     text-transform: uppercase; 
+     font-weight: normal;
+     background-color: #FFFFFF;
+}
+
+p.processingDots {
+
+     font-family: Segoe\000020UI,Tahoma,Arial; 
+     font-size: 12px; 
+     text-transform: uppercase; 
+     font-weight: normal;
+     background-color: #FFFFFF;
+}
+
+#description{
+
+     background-color: #d3d3d3;
+     margin-top 2px;
+     height: 20px;
+     weight: 50px;
+     margin-top: 8px;
+
+}
