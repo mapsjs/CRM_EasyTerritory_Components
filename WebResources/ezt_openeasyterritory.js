@@ -1,17 +1,19 @@
-﻿function openURL() {
+function openURL() {
 
     // var eztEndpoint = 'https://democrm.easyterritory.com/APP';
     var eztEndpoint = getEZTSetting("EZT Instance URL");
-    var strLatFields = getEZTSetting("crmAdvFindLatFields");
-    var strLonFields = getEZTSetting("crmAdvFindLonFields");
 
-    if (eztEndpoint == "Forbidden" || strLatFields == "Forbidden" || strLonFields == "Forbidden") {
+    if (eztEndpoint == "Forbidden") {
         txt = "There was an error on this page.\n\n";
         txt += "Current User does not have sufficient security rights to read EasyTerritory Settings.\r\n\r\nPlease contact your administrator and request that Read access be granted to the EasyTerritory Settings entity.\n\n";
         txt += "Click OK to continue.\n\n";
         alert(txt);
         return;
     }
+
+    var strLatFields = getEZTSetting("crmAdvFindLatFields");
+    var strLonFields = getEZTSetting("crmAdvFindLonFields");
+
 
     // using the user guid as the project id prevents the creation of endless hidden projects in the system that never get deleted
     // it also ensure concurrent user protection
@@ -59,18 +61,19 @@
                 //new project object
                 var project = {
                     id: userGuid,
+                    creatorId: userGuid,
                     customJson: JSON.stringify({
                         type: 'fetchXml',
                         data: theFetchXml
                     }),
-                    allowOverwrite: true,
+                    allowOverwrite: false,
                     unlisted: true,
                     label: 'Advanced Find Results'
                 };
 
                 // call ezt rest service to create a new project
                 var call = $.ajax({
-                    url: eztEndpoint + '/REST/Project',
+                    url: eztEndpoint + '/REST/Project/',
                     type: 'POST',
                     cache: false,
                     contentType: 'application/json; charset=utf-8',
@@ -83,7 +86,7 @@
                     var projectId = data.id;
 
                     // do your window.open here using the above project id
-                    window.open(eztEndpoint + '/index.html?projectId=' + projectId);
+                    window.open(eztEndpoint + '/index.aspx?projectId=' + projectId);
                 });
             }
             else {
@@ -141,7 +144,10 @@ function getEZTSetting(settingName) {
 
         },
         error: function (xhr, textStatus, errorThrown) {
-            alert(textStatus + " " + errorThrown);
+if(errorThrown == "Forbidden") { 
+retval = "Forbidden";
+}
+else alert(textStatus + " " + errorThrown);
         }
     });
 
