@@ -1,9 +1,11 @@
-<html>
-<head>
+<html><head>
     <meta charset="utf-8">
     <title></title>
     <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
     <script src="../../WebResources/ezt_Utilities.js"></script>
+
+    <!-- ezt custom css -->
+    <link rel="stylesheet" type="text/css" href="../../WebResources/ezt_webResourceStyles.css">
 
     <script>
 
@@ -29,6 +31,7 @@
             for (var i = 0; i < listLength; i += 2) {
                 if (cbViews.children[i].children[0].checked) {
                     var strLabelValue = cbViews.children[i].children[0].value;
+                    // var strLabel = cbViews.children[i].children[0].label;
                     var strLabel = cbViews.children[i].innerText.trim();
                     var strArrayValueData = strLabelValue.split('|');
                     var strViewType = strArrayValueData[0];
@@ -48,8 +51,9 @@
                 //new project object
                 var project = {
                     id: userGuid,
+                    creatorId: userGuid,
                     customJson: JSON.stringify(eztObject),
-                    allowOverwrite: true,
+                    allowOverwrite: false,
                     unlisted: true,
                     label: 'Advanced Find Results'
                 };
@@ -67,7 +71,7 @@
                 call.done(function (data) {
                     var projectId = data.id;
                     // window.open here using project id
-                    window.open(eztEndpoint + '/index.html?projectId=' + projectId);
+                    window.open(eztEndpoint + '/index.aspx?projectId=' + projectId);
                 });
 
                 // Make the 'loading' panel go away after a few seconds
@@ -85,7 +89,7 @@
     <style>
         body {
             overflow: hidden;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: Segoe\000020UI,Tahoma,Arial;
             font-size: 12px;
         }
 
@@ -147,8 +151,8 @@
             width: 680px;
         }
     </style>
-</head>
-<body>
+<meta><meta><meta><meta><meta></head>
+<body style="word-wrap: break-word;" onfocusout="parent.setEmailRange();">
     <div id="divPnlMessage" hidden="hidden" class="alert alert-danger">
         <label id="lblMessage" style="font-size:16pt;">...</label>
     </div>
@@ -156,7 +160,7 @@
         <table>
             <thead>
                 <tr style="background-color:white;">
-                    <td><img src="../../WebResources/EZT_logo_256x55.png" /></td>
+                    <td><img class="eztlogo" src="../../webresources/ezt_logosvg"></td>
                     <td class="align-right spaced-top-2x">
                         <button id="btnSubmit" type="button" class="btn" onclick="btnMapViews_OnClick()">
                             Map Selected Views
@@ -343,7 +347,7 @@
 
                             };
 
-                            debugger;
+                            
 
                             // Build the list of checkbox items for the user to select from
                             var buildCheckBoxList = function () {
@@ -425,5 +429,5 @@
         page_OnLoad();
     </script>
 
-</body>
-</html>
+
+</body></html>
