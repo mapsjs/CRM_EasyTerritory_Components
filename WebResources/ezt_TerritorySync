@@ -9,7 +9,7 @@
     <script src="../WebResources/ezt_async.js"></script>
     <!-- Xrm.Page model -->
     <script src="../../WebResources/ClientGlobalContext.js.aspx" type="text/javascript"></script>
-<meta><meta><meta><meta><meta><meta><meta></head>
+<meta><meta><meta><meta><meta><meta><meta><meta></head>
 
 <body style="overflow-wrap: break-word;" onfocusout="parent.setEmailRange();">
     <div><img class="eztlogo" src="../../webresources/ezt_logosvg"></div>
@@ -181,11 +181,12 @@
         // get oi token from login endpoint
         function eztLogin(eztUrl, uN, pW, cBack) {
 
+            var eztPW = atob(pW);
 
             $.ajax({
                 url: eztUrl + "/REST/Login/Login",
                 method: "POST",
-                data: JSON.stringify({ username: uN, password: pW }),
+                data: JSON.stringify({ username: uN, password: eztPW }),
                 contentType: "application/json",
                 beforeSend: function() {
                    
