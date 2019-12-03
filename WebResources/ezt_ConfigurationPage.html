@@ -23,15 +23,19 @@
                 var inputTxtSettingName = document.getElementById("td1_" + i.toString()).innerText;
                 var inputTxtSettingValue = document.getElementsByName("txtSettingValue_" + i.toString())[0].value;
                 var inputTxtSettingID = document.getElementById("hidden_" + i.toString()).value;
+                var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
 
-                if(inputTxtSettingValue.toString().toLowerCase() != '[password was entered]'){
-                    var strTestSettingValue = EZT.Utilities.getEZTSetting(inputTxtSettingName);
+                if(inputTxtSettingName == "EZT Password"){
+
+                    inputTxtSettingValue = btoa(inputTxtSettingValue.toString());
+
+                }
                     // Only update value if it's changed...
                     if (strTestSettingValue.toString().toLowerCase() != inputTxtSettingValue.toLowerCase()) {
                         EZT.Utilities.updateEZTSettingValue(inputTxtSettingID, inputTxtSettingValue);
                         settingsUpdated = true;
                     }
-                }
+                
 
             }
 
@@ -320,7 +324,7 @@
             margin: 0;
         }
     </style>
-<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><meta><meta><meta><meta><meta><meta><meta><meta></head>
+<meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><style type="text/css">P { margin: 0; }</style><meta><meta><meta><meta><meta><meta><meta><meta><meta><meta></head>
 
 <body style="word-wrap: break-word;" onfocusout="parent.setEmailRange();">
     <div id="divPnlMessage" hidden="hidden" class="alert alert-danger">
@@ -442,11 +446,7 @@
                             var ezt_easyterritorysettingsId = results[i].ezt_easyterritorysettingsId;
                             var ezt_SettingName = results[i].ezt_SettingName;
                             var ezt_Setting = results[i].ezt_Setting;
-                            if(ezt_SettingName == 'EZT Password'){
-                                if(ezt_Setting != 'password'){
-                                    ezt_Setting = '[password was entered]'
-                                }
-                            }
+                         
                             var dtModifiedOn = results[i].ModifiedOn;
                             addSettingTableRow("divSettings", ezt_easyterritorysettingsId, ezt_SettingName, ezt_Setting, dtModifiedOn, i.toString());
                         }
