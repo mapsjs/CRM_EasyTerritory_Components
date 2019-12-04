@@ -18,7 +18,7 @@
         <!-- javascript azync library-->
         <script src="../WebResources/ezt_async.js"></script>
 
-        <meta></head>
+        <meta><meta><meta><meta><meta><meta><meta></head>
      
         <body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;">
 
@@ -31,14 +31,17 @@
         <button onclick="ezt_stopJob()" class="eztButtonText" style="visibility: visible;" id="stopJob" disabled=""><img class="eztButtons1" src="../../webresources/ezt_deactivate.png">Cancel</button>
 
 
+        <div style="display:inline-block;padding-left: 7px;"><input type="checkbox" id="detailed" style="display: inline-block; line-height: normal; -ms-transform: scale(2);-moz-transform: scale(2);-webkit-transform: scale(2);-o-transform: scale(2);transform: scale(1.30);position: relative;top: 3px;"><p style="display: inline-block; padding-left: 4px;">Detailed Logging</p></div>
+
      <div id="log" style="font-family: undefined;"></div>
 
         <!-- This is paragraph elements for the output of script -->
         <p style="color:red; margin-left:10px; margin-top: 2px; visibility: hidden;" id="cancel"> </p>
         <p style="margin-left:10px; visibility: hidden;" id="ezt"> </p>
-
-        <p style="margin-left:10px; visibility: hidden;" id="errors">Log: </p>
         <p style="margin-left:10px; visibility: visible;" id="divCheckList"> </p>
+        <p style="margin-left:10px; visibility: hidden;" id="detailedLogsSection">Log: <br></p>
+        <p style="margin-left:10px; visibility: hidden;" id="errors"> </p>
+        
     </div>
     <script>
     
@@ -52,10 +55,12 @@
             var entity = "";
             var moreBlocks = true;
             var cancelClicked = false;
-            
+            var detailedLogs = false;
             var workFlowFireCount = 0;
             var areFieldsFilledIn = true;
             var eztObject = [];
+            entityPrimeNameField = "";
+            var fireWorkFlowCount = 0
 
             function getCrmView() {
                 
@@ -79,6 +84,7 @@
             function startTheScript() {
                     //this sets the variables from the form for runJob()    
                     //setValuesForJob();
+
                     getViewsFromCheckBox();
                 async.waterfall([            
                 
@@ -111,14 +117,20 @@
                     document.getElementById("runJob").disabled = true;
                 } {
                     document.getElementById("ezt").style.visibility = "visible";
-                }
+                }{
                 document.getElementById("cancel").innerHTML = ("");
-            
-                
+                }document.getElementById("detailedLogsSection").style.visibility = "visible";
+                document.getElementById("detailedLogsSection").innerHTML = ("");
 
-                
+                var detailLogsCheckBox = document.getElementById("detailed");
+	            detailedLogs = false;
+	            fireWorkFlowCount = 0;
 
-
+	            if(detailLogsCheckBox.checked){
+	                
+	                detailedLogs = true;
+	                    
+	            } 
                 // This loop is done because we can only get 5,000 records at a time
                 async.whilst(
 
@@ -310,7 +322,21 @@
 
 
                                 document.getElementById("ezt").innerHTML = ("Completed workflow on " + workFlowFireCount + " records");
-                                doneWithRow();
+
+                                
+                                if(detailedLogs){
+                                    //console.log('block' + block[name]);
+                                    document.getElementById("detailedLogsSection").innerHTML += ("Workflow has executed on record '" +  block[entityPrimeNameField] + "' with id '" + entityId + '<br />');
+
+                                }
+
+                                console.log('fireWorkflow');
+                                if(fireWorkFlowCount < 21){
+                                	checkSystemJobs(result.asyncoperationid, doneWithRow);
+                            	} else{
+                                	doneWithRow();
+                            	}
+                                fireWorkFlowCount ++;
 
                             } else if (this.status == 400 || this.status == 404 || this.status == 500) {
                                 //error callback
@@ -326,6 +352,95 @@
 
                     document.getElementById("errors").innerHTML += ("Error in executing: " + functionName + ":  " + err);
                 }
+
+            }
+
+            function checkSystemJobs(asyncId, callBack){
+
+                
+                var asyncJobUrl = clientUrl + "/api/data/v8.2/asyncoperations?$filter=asyncoperationid eq '" + asyncId + "'&$select=statecode,statuscode";
+                var jobFinished = false;
+
+                async.whilst(
+                    function() { return !jobFinished },
+                    function(cb) {
+
+                        var req = new XMLHttpRequest();
+                        
+                        req.open("GET", asyncJobUrl, true);
+                        req.setRequestHeader("Accept", "application/json");
+                        req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                        req.setRequestHeader("OData-MaxVersion", "4.0");
+                        req.setRequestHeader("OData-Version", "4.0");
+
+                        req.onreadystatechange = function() {
+                            if (this.readyState == 4 && this.status == 200) {
+
+                                    var jobResult = JSON.parse(this.response);
+
+                                    if(jobResult.value.length == 0){
+
+                                    	jobFinished = true;
+                                    	cb(null);
+
+                                    }else {
+
+	                                    var status = jobResult.value[0].statuscode;
+
+	                                    if (status == 10 || status == 20 || status == 0){
+	                                    
+	                                        jobFinished = false;
+
+	                                        setTimeout(function() {
+	            								cb(null);
+	        								}, 500);
+
+	                                    } else if(status == 31 || status == 32 || status == 30 || status == 0 || status == 22){
+
+	                                        if(status == 32 || status == 31 || status == 22){
+	                                            
+	                                            stopJob();
+	                                            jobFinished = true;
+	                                            cb('err');
+
+	                                        } else{
+
+	                                        	jobFinished = true;
+
+	                                        	setTimeout(function() {
+	            									cb(null);
+	        									}, 500);
+	                                    	}
+
+	                                    } else {
+
+	                                    	jobFinished = false;
+	                                    	setTimeout(function() {
+	            								cb(null);
+	        								}, 500);
+	                                    }
+
+	                                    
+	                                }
+	                               
+	                        } 
+
+                        }
+                        req.send();
+                        
+
+                    },
+                    function(err) {
+
+                    	 	if(err){
+
+                    		document.getElementById("errors").innerHTML += "Error- One or more asynchronous jobs have failed! Please check configuration. <br />";
+                    		document.getElementById("errors").style.color = "red";
+                    	}
+                          callBack();
+                        
+                    }
+                );
 
             }
 
@@ -348,7 +463,7 @@
 
 
                 var entitypluralURL = clientUrl +
-                    "/api/data/v8.2/EntityDefinitions?$select=LogicalName,LogicalCollectionName&$filter=LogicalName eq '" +
+                    "/api/data/v8.2/EntityDefinitions?$select=LogicalName,LogicalCollectionName,PrimaryNameAttribute&$filter=LogicalName eq '" +
                     entity + "'";
                 //var entitypluralURL = "crmDomain/api/data/v8.2/EntityDefinitions?$select=LogicalName,LogicalCollectionName&$filter=LogicalName eq 'lead'"
 
@@ -362,6 +477,7 @@
 
                         var entityPluralName = entityJson.value[0].LogicalCollectionName;
                         
+                        entityPrimeNameField = entityJson.value[0].PrimaryNameAttribute;
                         //var url = (clientUrl + '/api/data/v8.2/' + entityPluralName + '/?$select=' + entityid);
                         var url = "";
                         
@@ -582,10 +698,12 @@
 
         }
 
+
             window.ezt_runJob = startTheScript;
             window.ezt_stopJob = stopJob;
 
             window.ezt_getView = getCrmView;
+            
         })();
     </script>
 
