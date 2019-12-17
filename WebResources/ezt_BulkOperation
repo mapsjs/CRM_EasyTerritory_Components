@@ -18,7 +18,7 @@
         <!-- javascript azync library-->
         <script src="../WebResources/ezt_async.js"></script>
 
-        <meta><meta><meta><meta><meta><meta><meta></head>
+        <meta><meta><meta><meta><meta><meta><meta><meta><meta><meta></head>
      
         <body onfocusout="parent.setEmailRange();" style="word-wrap: break-word;">
 
@@ -317,7 +317,7 @@
                             if (this.status == 200) {
                                 //success callback this returns null since no return value available.
                                 var result = JSON.parse(this.response);
-
+console.log('execute workFlow results', result);
                                 workFlowFireCount++;
 
 
@@ -326,7 +326,7 @@
                                 
                                 if(detailedLogs){
                                     //console.log('block' + block[name]);
-                                    document.getElementById("detailedLogsSection").innerHTML += ("Workflow has executed on record '" +  block[entityPrimeNameField] + "' with id '" + entityId + '<br />');
+                                    document.getElementById("detailedLogsSection").innerHTML += ("Workflow has executed on record '" +  block[entityPrimeNameField] + "'"  + '<br />');
 
                                 }
 
@@ -360,6 +360,7 @@
                 
                 var asyncJobUrl = clientUrl + "/api/data/v8.2/asyncoperations?$filter=asyncoperationid eq '" + asyncId + "'&$select=statecode,statuscode";
                 var jobFinished = false;
+				console.log('checkSystemJobsBeginning', asyncJobUrl);
 
                 async.whilst(
                     function() { return !jobFinished },
@@ -377,6 +378,8 @@
                             if (this.readyState == 4 && this.status == 200) {
 
                                     var jobResult = JSON.parse(this.response);
+
+                                    console.log('job Status', jobResult);
 
                                     if(jobResult.value.length == 0){
 
